@@ -10,7 +10,8 @@ echo "Starting run at $(date)" >> "$LOG_FILE"
 # for dir in "30m-ours" "30m-mlt++" "30m-normal" "30m-supereduction_a=2" "30m-supereduction_a=5" "40m-ours" "40m-normal" "40m-mlt++" "40m-supereduction_a=2" "50m-ours" "50m-mlt++" "50m-normal" "50m-supereduction_a=2"; do
 # for dir in "120m-ours" "120m-supereduction_a=2" "160m-ours" "160m-supereduction_a=2"; do
 # for dir in "60m-ours_reduction" "60m-supereduction_a=2_reduction" "80m-ours_reduction" "80m-supereduction_a=2_reduction" ; do
-for dir in "80m-ours_post" "80m-supereduction_a=2_post" "80m-mlt_tdc_only" "80m-mlt_tdc_only_post" ; do
+for dir in {10,30,40,60}m-*; do
+    [[ "$dir" == *wours_post || "$dir" == *_reduction || "$dir" == *" _reduction" ]] && continue
     if [ -d "$dir" ]; then
         echo "Entering $dir" >> "$LOG_FILE"
         cd "$dir" || continue
