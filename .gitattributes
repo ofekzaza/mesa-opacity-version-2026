@@ -1,0 +1,2 @@
+80m-ours_reduction/LOGS/history.data filter=lfs diff=lfs merge=lfs -text
+80m-ours_reduction/LOGS/pgstar.dat filter=lfs diff=lfs merge=lfs -text
