@@ -1,6 +1,7 @@
-import mesa_reader as mr
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
+import mesa_reader as mr
 
 # List of history file names (without extensions)
 NAMES = [
@@ -29,25 +30,26 @@ MASS = 60
 
 import utils
 
-def plot_hr_diagram(mass: int, names: list[str]):
+
+def plot_hr_diagram(mass: int, names: list[str], phase: str = ""):
     base_colors = {}
-    # Iterate over each history file
+    phase_suffix = f"_{phase}" if phase else ""
     for name in names:
         path = f"{mass}m-{name}/LOGS/history.data"
-        
+
         try:
             # Load the history data
             history = mr.MesaData(path)
-            
+
             kwargs, is_winds, base_name = utils.get_line_kwargs(name, base_colors)
 
             # Plot log_L vs. log_Teff
             (line,) = plt.plot(history.log_Teff, history.log_L, **kwargs)
             color = line.get_color()
-            
+
             if not is_winds:
                 base_colors[base_name] = color
-                
+
             plt.plot(history.log_Teff[-1], history.log_L[-1], "o", color=color)
         except FileNotFoundError:
             print(f"Warning: {path}.data not found. Skipping.")
@@ -62,9 +64,10 @@ def plot_hr_diagram(mass: int, names: list[str]):
     plt.tight_layout()
 
     # Save the plot
-    os.makedirs(f"plot{mass}m", exist_ok=True)
-    plt.savefig(f"plot{mass}m/mass_{mass}_hr_diagram_comparison.png", dpi=300)
+    os.makedirs(f"plot{mass}m{phase_suffix}", exist_ok=True)
+    plt.savefig(f"plot{mass}m{phase_suffix}/mass_{mass}_hr_diagram_comparison.png", dpi=300)
     plt.close()
+
 
 if __name__ == "__main__":
     plot_hr_diagram(MASS, NAMES)

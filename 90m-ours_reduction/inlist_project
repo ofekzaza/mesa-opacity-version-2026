@@ -1,0 +1,129 @@
+! inlist to evolve a 15 solar mass star
+
+! For the sake of future readers of this file (yourself included),
+! ONLY include the controls you are actually using.  DO NOT include
+! all of the other controls that simply have their default values.
+
+&star_job
+
+   ! see star/defaults/star_job.defaults
+
+   ! begin with a pre-main sequence model
+   create_pre_main_sequence_model = .true.
+
+   ! save a model at the end of the run
+   save_model_when_terminate = .false.
+   save_model_filename = '15M_at_TAMS.mod'
+
+   ! display on-screen plots
+   pgstar_flag = .true.
+
+/ ! end of star_job namelist
+
+
+&eos
+
+   ! eos options
+   ! see eos/defaults/eos.defaults
+
+/ ! end of eos namelist
+
+
+&kap
+
+   ! kap options
+   ! see kap/defaults/kap.defaults
+   use_Type2_opacities = .true.
+   Zbase = 0.02
+
+/ ! end of kap namelist
+
+
+&controls
+
+   ! see star/defaults/controls.defaults
+    terminal_interval = 1000
+    max_num_profile_models = 2000
+    history_interval = 25
+
+   ! starting specifications
+   initial_mass = 90 ! in Msun units
+   initial_z = 0.02
+
+   ! when to stop
+
+
+    ! stop_at_phase_C_Burn = .true.
+    stop_at_phase_O_Burn = .true.
+    ! stop_at_phase_WDCS = .true.
+
+   !! stop when the star nears ZAMS (Lnuc/L > 0.99)
+   !Lnuc_div_L_zams_limit = 0.99d0
+   !stop_near_zams = .true.
+
+   !! stop when the center mass fraction of h1 drops below this limit
+   !xa_central_lower_limit_species(1) = 'h1'
+   !xa_central_lower_limit(1) = 1d-3
+
+   ! wind
+
+   hot_wind_scheme = 'Dutch'
+   Dutch_scaling_factor = 0.66 
+
+   ! atmosphere
+
+   ! rotation
+
+   ! element diffusion
+
+   ! mlt
+
+   ! mixing
+
+   ! timesteps
+    ! time_delta_coeff = 2
+    time_delta_coeff = 0.5
+
+    ! 1d-3
+    varcontrol_target   = 1d-4
+    timestep_factor_for_retries = 0.75
+
+   ! mesh
+
+   ! solver
+   ! options for energy conservation (see MESA V, Section 3)
+   energy_eqn_option = 'dedt'
+   use_gold_tolerances = .true.
+
+
+   MLT_option = 'TDC'
+   okay_to_reduce_gradT_excess = .false.
+
+   ! output
+   
+    ! mlt++
+    ! MLT_option = 'TDC'
+    ! okay_to_reduce_gradT_excess = .true.
+    ! gradT_excess_max_change = 0.01d0
+
+  ! superad a = 2
+    ! MLT_option = 'TDC'
+    ! use_superad_reduction = .true.
+    ! superad_reduction_Gamma_limit = 0.5d0
+    ! superad_reduction_Gamma_limit_scale = 2d0
+    ! superad_reduction_Gamma_inv_scale = 2d0
+    ! superad_reduction_diff_grads_limit = 1d-2 ! this is lowered to 1d-2 in the first 100 steps in run_star_extras
+    ! superad_reduction_limit = -1d0
+
+
+  ! superad a = 5
+    ! MLT_option = 'TDC'
+    ! use_superad_reduction = .true.
+    ! superad_reduction_Gamma_limit = 0.5d0
+    ! superad_reduction_Gamma_limit_scale = 5d0
+    ! superad_reduction_Gamma_inv_scale = 5d0
+    ! superad_reduction_diff_grads_limit = 1d-2 ! this is lowered to 1d-2 in the first 100 steps in run_star_extras
+    ! superad_reduction_limit = -1d0
+
+
+/ ! end of controls namelist

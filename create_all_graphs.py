@@ -10,12 +10,13 @@ folders_for_graphs = {
     # 50: ["ours", "supereduction_a=2", "mlt++", "normal"],
     # 60: ["ours", "supereduction_a=2", "mlt++", "ours_reduction", "supereduction_a=2_reduction"],
     80: [
-        "ours",
-        "ours_post",
-        "supereduction_a=2",
-        "supereduction_a=2_post",
-        "mlt_tdc_only",
-        "mlt_tdc_only_post",
+        # "ours",
+        # "ours_post",
+        # "supereduction_a=2",
+        # "supereduction_a=2_post",
+        # "mlt_tdc_only",
+        # "mlt_tdc_only_post",
+        "ours_reduction",
         # "mlt++",
         # "",
         # "ours_post"
@@ -31,6 +32,7 @@ for mass, names in folders_for_graphs.items():
     print(f"start graphs for {mass}M☉ folders")
     print(json.dumps(names, ensure_ascii=False))
     generic_last_log_plot.plot_generic_last_log_plot(mass, names)
+    generic_last_log_plot.plot_generic_last_log_plot(mass, names, x_axis="logR", x_units="R☉")
     hr_diagram_script.plot_hr_diagram(mass, names)
 
     for name in names:

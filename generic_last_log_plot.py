@@ -1,3 +1,5 @@
+import glob
+
 import matplotlib.pyplot as plt
 import mesa_reader as mr
 
@@ -232,9 +234,11 @@ MASS = 60
 #'supereduction_a=5' empty it doesnt run
 # Initialize the plot
 def plot(
-    mass: int, names: list[str], x_axis: str, x_units: str, y_axis: str, y_units: str
+    mass: int, names: list[str], x_axis: str, x_units: str, y_axis: str, y_units: str,
+    phase: str = "",
 ):
     plt.figure()
+    phase_suffix = f"_{phase}" if phase else ""
 
     base_colors = {}
 
@@ -244,9 +248,18 @@ def plot(
         try:
             print(path)
             # Load the history data
-            history = mr.MesaLogDir(path)
+            print(path)
+            try:
+                history = mr.MesaLogDir(path)
+                last_profile = history.profile_numbers[-1]
+            except Exception as e:
+                print(e)
+                print(f"history of {path} is invalid")
+                last_profile = glob.glob(f"{path}/profile*.data")[-1]
+                last_profile = int(last_profile.split("profile")[-1].split(".data")[0])
+
             # Plot log_L vs. log_Teff
-            prof = mr.MesaData(f"{path}/profile{history.profile_numbers[-1]}.data")
+            prof = mr.MesaData(f"{path}/profile{last_profile}.data")
             if not hasattr(prof, y_axis):
                 print(f"{y_axis} is not in prof")
                 continue
@@ -281,12 +294,12 @@ def plot(
     plt.tight_layout()
 
     # Save the plot
-    os.makedirs(f"plot{mass}m", exist_ok=True)
-    plt.savefig(f"plot{mass}m/Mass_{mass}_{y_axis}_vs_{x_axis}.png", dpi=300)
+    os.makedirs(f"plot{mass}m{phase_suffix}", exist_ok=True)
+    plt.savefig(f"plot{mass}m{phase_suffix}/Mass_{mass}_{y_axis}_vs_{x_axis}.png", dpi=300)
     plt.close()
 
 
-def plot_generic_last_log_plot(mass: int, names: list[str]):
+def plot_generic_last_log_plot(mass: int, names: list[str], x_axis="logRho", x_units="g/cm^3", phase: str = ""):
     for y_axis in y_axises:
         print(y_axis, names)
-        plot(mass, names, x_axis="logRho", x_units="g/cm^3", y_axis=y_axis, y_units="")
+        plot(mass, names, x_axis=x_axis, x_units=x_units, y_axis=y_axis, y_units="", phase=phase)

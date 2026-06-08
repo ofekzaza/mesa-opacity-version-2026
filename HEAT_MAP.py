@@ -18,6 +18,7 @@ def plot(
     y_units: str,
     value_axis: str,
     normalize: bool = True,
+    phase: str = "",
 ):
     """
     model_var: the field holding model number (always 'model_number')
@@ -26,6 +27,7 @@ def plot(
     """
 
     path = f"{mass}m-{name}/LOGS"
+    phase_suffix = f"_{phase}" if phase else ""
 
     print(f"Reading profiles from: {path}")
 
@@ -169,7 +171,7 @@ def plot(
 
     plt.tight_layout()
     plt.savefig(
-        f"plot{mass}m/HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}.png", dpi=300
+        f"plot{mass}m{phase_suffix}/HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}.png", dpi=300
     )
     plt.close()
 
@@ -179,6 +181,7 @@ def plot_heat_map(
     name: str,
     value_axis: str = "extra_opacity_factor",
     normalize: bool = True,
+    phase: str = "",
 ):
     plot(
         mass=mass,
@@ -188,6 +191,7 @@ def plot_heat_map(
         y_units="g/cm^3",
         value_axis=value_axis,
         normalize=normalize,
+        phase=phase,
     )
 
 
