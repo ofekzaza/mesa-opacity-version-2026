@@ -1,12 +1,15 @@
-to create the graphs yourself, execute create_all_graphs.py using uv
-uv run create_all_graphs.py
+## requirment:
+-  mesa 26.4.1
+- mesa sdk 26.3.2
+- uv https://docs.astral.sh/uv/getting-started/installation/
+- execute "uv sync"
 
-to install uv https://docs.astral.sh/uv/getting-started/installation/
-
-
+## other info
 - _reduction means there are winds
 
+## how to execute
+run "sh run.sh", this would take about a week.
 
-we used 2025 mesa
-to run the models see run.sh file, set there what you want to run and than run it, it will create logs in run_logs.txt
-to clean all folder execute clean.sh.
+## create graphs
+execute "uv run main.py" after all simulations are done
+
