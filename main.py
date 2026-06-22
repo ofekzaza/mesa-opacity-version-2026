@@ -40,6 +40,10 @@ folders_for_graphs = {
         "ours_reduction_post",
         "supereduction_a=2_reduction",
         "supereduction_a=2_reduction_post",
+        "mlt++_reduction",
+        "mlt++_reduction_post",
+        "normal_reduction",
+        "normal_reduction_post",
     ],
     40: [
         "ours_reduction",
@@ -92,25 +96,41 @@ for mass, names in folders_for_graphs.items():
 
     grouped = _group_names(names)
 
+    # Group by phase for comparison plots
+    by_phase: dict[str, list[str]] = {}
     for name, phase in grouped:
-        print(f"  {name} (phase={phase or 'none'})...")
+        by_phase.setdefault(phase, []).append(name)
+
+    # Comparison plots: all names per phase together
+    for phase, phase_names in by_phase.items():
+        if not phase:
+            continue
+        print(f"  comparison plots for phase={phase}: {phase_names}")
 
         try:
-            generic_last_log_plot.plot_generic_last_log_plot(mass, [name], phase=phase)
+            generic_last_log_plot.plot_generic_last_log_plot(
+                mass, phase_names, phase=phase
+            )
         except Exception as e:
             print(f"    generic_last_log_plot failed: {e}")
 
         try:
             generic_last_log_plot.plot_generic_last_log_plot(
-                mass, [name], x_axis="logR", x_units="R\u2609", phase=phase
+                mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase
             )
         except Exception as e:
             print(f"    generic_last_log_plot(logR) failed: {e}")
 
         try:
-            hr_diagram_script.plot_hr_diagram(mass, [name], phase=phase)
+            hr_diagram_script.plot_hr_diagram(mass, phase_names, phase=phase)
         except Exception as e:
             print(f"    hr_diagram_script failed: {e}")
+
+    # Individual per-folder plots
+    for name, phase in grouped:
+        print(f"  individual plots for {name} (phase={phase or 'none'})...")
+
+        material_composition_plot.plot(mass, name, phase=phase)
 
         if "ours" in name:
             try:
@@ -120,11 +140,14 @@ for mass, names in folders_for_graphs.items():
 
         try:
             HEAT_MAP.plot_heat_map(
-                mass, name, value_axis="L_div_Ledd_effective", normalize=False, phase=phase
+                mass,
+                name,
+                value_axis="L_div_Ledd_effective",
+                normalize=False,
+                phase=phase,
             )
         except Exception as e:
             print(f"    HEAT_MAP({name}, L_div_Ledd) failed: {e}")
 
-        material_composition_plot.plot(mass, name, phase=phase)
 
     print("\n")

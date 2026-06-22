@@ -37,14 +37,13 @@ def _get_last_profile_num(path):
 
 def _setup_ax(ax):
     ax.set_ylabel('Mass Fraction')
-    ax.set_yscale('log')
+    ax.set_yscale('symlog', linthresh=0.01)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=8, loc='best')
 
 
 def _finalize_ax(ax):
-    ymin, ymax = ax.get_ylim()
-    ax.set_ylim(bottom=ymin * 0.5, top=1)
+    ax.set_ylim(bottom=0, top=1)
 
 
 def _plot_abundance_vs_logr(mass: int, name: str, phase: str = ""):
@@ -70,7 +69,7 @@ def _plot_abundance_vs_logr(mass: int, name: str, phase: str = ""):
         ax.set_xlabel('log(R/R\u2609)')
         _setup_ax(ax)
         _finalize_ax(ax)
-        ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
+        # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
 
     plt.tight_layout()
     plt.savefig(f'{out_dir}/Mass_{mass}_{name}_abundance_vs_logR.png', dpi=300)
@@ -101,7 +100,7 @@ def _plot_abundance_vs_logrho(mass: int, name: str, phase: str = ""):
         ax.set_xlabel('log(\u03c1) [g/cm\u00b3]')
         _setup_ax(ax)
         _finalize_ax(ax)
-        ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
+        # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
 
     plt.tight_layout()
     plt.savefig(f'{out_dir}/Mass_{mass}_{name}_abundance_vs_logRho.png', dpi=300)
@@ -165,7 +164,7 @@ def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
     ax.set_xlabel('Model Number')
     _setup_ax(ax)
     _finalize_ax(ax)
-    ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
+    # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
 
     if len(model_numbers) > 1:
         sec_ax = ax.secondary_xaxis('top')
