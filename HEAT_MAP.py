@@ -137,7 +137,7 @@ def plot(
     plt.plot(model_numbers, max_rhos, color="red", linewidth=1.5, linestyle="--")
     plt.legend(loc="upper right", framealpha=0.7)
 
-    cbar = plt.colorbar(label=utils.parse_name_for_plots(value_axis) + " [%]")
+    cbar = plt.colorbar(label=utils.pretty_axis_name(value_axis) + " [%]")
     # Manually configure visually evenly-spaced ticks to prevent overlapping labels at the bottom due to PowerNorm
     if normalize:
         norm_vals = np.linspace(0, 1, 6)
@@ -166,7 +166,7 @@ def plot(
     ax.set_xticklabels(new_labels)
 
     plt.xlabel("Model Number\n(Star Age [years])")
-    plt.ylabel(f"{utils.parse_name_for_plots(y_axis)} [{y_units}]")
+    plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
     # plt.title(f"{value_axis} vs {y_axis} across Model Number")
 
     plt.tight_layout()

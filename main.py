@@ -108,6 +108,7 @@ for mass, names in folders_for_graphs.items():
         print(f"  comparison plots for phase={phase}: {phase_names}")
 
         try:
+            generic_last_log_plot.plot(mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase, y_axis="logRho", y_units="g/cm³")
             generic_last_log_plot.plot_generic_last_log_plot(
                 mass, phase_names, phase=phase
             )
@@ -116,7 +117,7 @@ for mass, names in folders_for_graphs.items():
 
         try:
             generic_last_log_plot.plot_generic_last_log_plot(
-                mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase
+                mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase, inverse_x=True
             )
         except Exception as e:
             print(f"    generic_last_log_plot(logR) failed: {e}")

@@ -235,7 +235,7 @@ MASS = 60
 # Initialize the plot
 def plot(
     mass: int, names: list[str], x_axis: str, x_units: str, y_axis: str, y_units: str,
-    phase: str = "",
+    phase: str = "", inverse_x: bool = False
 ):
     plt.figure()
     phase_suffix = f"_{phase}" if phase else ""
@@ -281,15 +281,19 @@ def plot(
             plt.plot(x_data[-1], y_data[-1], "o", markersize=6, color=color)
             plt.plot(x_data[0], y_data[0], "o", markersize=6, color=color)
 
+
         except FileNotFoundError:
             print(f"Warning: {path}.data not found. Skipping.")
 
     # Customize the plot
     x_units = fr" [{x_units}]" if x_units else ""
     y_units = fr" [{y_units}]" if y_units else ""
-    plt.xlabel(f"{utils.parse_name_for_plots(x_axis)}{x_units}")
-    plt.ylabel(f"{utils.parse_name_for_plots(y_axis)}{y_units}")
+    plt.xlabel(f"{utils.pretty_axis_name(x_axis)}{x_units}")
+    plt.ylabel(f"{utils.pretty_axis_name(y_axis)}{y_units}")
     # plt.title(f"Mass {mass}: {y_axis} vs {x_axis} at onset of Carbon burning")
+
+    if inverse_x:
+        plt.gca().invert_xaxis()
 
     plt.grid(True)
     plt.legend()
@@ -301,7 +305,7 @@ def plot(
     plt.close()
 
 
-def plot_generic_last_log_plot(mass: int, names: list[str], x_axis="logRho", x_units=r"g/cm$^3$", phase: str = "",y_units: str=""):
+def plot_generic_last_log_plot(mass: int, names: list[str], x_axis="logRho", x_units=r"g/cm$^3$", phase: str = "",y_units: str="", inverse_x: bool = False):
     for y_axis in y_axises:
         print(y_axis, names)
-        plot(mass, names, x_axis=x_axis, x_units=x_units, y_axis=y_axis, y_units=y_units, phase=phase)
+        plot(mass, names, x_axis=x_axis, x_units=x_units, y_axis=y_axis, y_units=y_units, phase=phase, inverse_x=inverse_x)
