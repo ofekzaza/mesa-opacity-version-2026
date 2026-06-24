@@ -2,14 +2,31 @@ OURS_NAME = "Porosity Reduction"
 SUPEREDUCTION_NAME = "Super Reduction"
 
 
+REPLACE_DICT = {
+    "supereduction": SUPEREDUCTION_NAME,
+    "_reduction": "_winds",
+    "_": " ",
+    "-": " ",
+    "a=": "α=",
+    "mlt++": "MLT++",
+    " div ": "/",
+    "Ledd": r"$L_{edd}$",
+} 
+
 def parse_name_for_plots(name: str) -> str:
+    # plot_name = name.lower()
     plot_name = name.replace("ours", OURS_NAME) if "ours" in name else name
-    plot_name = plot_name.replace("supereduction", SUPEREDUCTION_NAME)
-    plot_name = plot_name.replace("_reduction", "_winds")
-    plot_name = plot_name.replace("_", " ")
-    plot_name = plot_name.replace("-", " ")
-    plot_name = plot_name.replace("a=", "α=")
-    plot_name = plot_name.capitalize()
+
+    for old, new in REPLACE_DICT.items():
+        plot_name = plot_name.replace(old, new)
+        
+    if plot_name.startswith("log"):
+        idx = plot_name[2:].find("log") or -1
+        inner = plot_name[3 + idx:] if idx != -1 else plot_name[3:]
+        recursive = parse_name_for_plots(plot_name[3 + idx:]) if idx != -1 else ""
+        plot_name = rf"$\log ({inner})$" + recursive
+    else:
+        plot_name = plot_name.title()
     return plot_name
 
 

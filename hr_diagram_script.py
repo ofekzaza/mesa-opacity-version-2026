@@ -55,8 +55,8 @@ def plot_hr_diagram(mass: int, names: list[str], phase: str = ""):
             print(f"Warning: {path}.data not found. Skipping.")
 
     # Customize the plot
-    plt.xlabel("log(Teff) [K]")
-    plt.ylabel("log(L/L☉)")
+    plt.xlabel(r"$\log (T_{\text{eff}}/\text{K})$")
+    plt.ylabel(r"$\log (L/L_{\sun})$")
     # plt.title(f"{mass} Mass Star Hertzsprung-Russell Diagram")
     plt.gca().invert_xaxis()  # HR diagrams have Teff decreasing to the right
     plt.grid(True)

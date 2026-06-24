@@ -285,8 +285,10 @@ def plot(
             print(f"Warning: {path}.data not found. Skipping.")
 
     # Customize the plot
-    plt.xlabel(f"{utils.parse_name_for_plots(x_axis)} [{x_units}]")
-    plt.ylabel(f"{utils.parse_name_for_plots(y_axis)} [{y_units}]")
+    x_units = fr" [{x_units}]" if x_units else ""
+    y_units = fr" [{y_units}]" if y_units else ""
+    plt.xlabel(f"{utils.parse_name_for_plots(x_axis)}{x_units}")
+    plt.ylabel(f"{utils.parse_name_for_plots(y_axis)}{y_units}")
     # plt.title(f"Mass {mass}: {y_axis} vs {x_axis} at onset of Carbon burning")
 
     plt.grid(True)
@@ -299,7 +301,7 @@ def plot(
     plt.close()
 
 
-def plot_generic_last_log_plot(mass: int, names: list[str], x_axis="logRho", x_units="g/cm^3", phase: str = ""):
+def plot_generic_last_log_plot(mass: int, names: list[str], x_axis="logRho", x_units=r"g/cm$^3$", phase: str = "",y_units: str=""):
     for y_axis in y_axises:
         print(y_axis, names)
-        plot(mass, names, x_axis=x_axis, x_units=x_units, y_axis=y_axis, y_units="", phase=phase)
+        plot(mass, names, x_axis=x_axis, x_units=x_units, y_axis=y_axis, y_units=y_units, phase=phase)

@@ -210,7 +210,7 @@ ax5.set_xlabel(r"Star Age [yr]")
 # first up, common isotope mass fractions
 xm = p.star_mass - p.mass
 for iso in ["h1", "he4", "c12", "n14", "o16"]:
-    element = "".join([i for i in iso if not i.isdigit()]).capitalize()
+    element = "".join([i for i in iso if not i.isdigit()]).title()
     mass_number = "".join([i for i in iso if i.isdigit()])
     tex_iso = r"${}^{" + mass_number + r"}$" + element
     ax6.loglog(xm, p.data(iso), label=tex_iso)
