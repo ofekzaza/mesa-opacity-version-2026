@@ -10,7 +10,8 @@ REPLACE_DICT = {
     "a=": "α=",
     "mlt++": "MLT++",
     "Ledd": r"$L_{edd}$",
-} 
+}
+
 
 def parse_name_for_plots(name: str) -> str:
     # plot_name = name.lower()
@@ -18,9 +19,10 @@ def parse_name_for_plots(name: str) -> str:
 
     for old, new in REPLACE_DICT.items():
         plot_name = plot_name.replace(old, new)
-        
+
     plot_name = plot_name.title()
     return plot_name
+
 
 pretty_axises = {
     "L_div_Ledd_effective": r"$L/L_{edd}$ effective",
@@ -30,14 +32,18 @@ pretty_axises = {
     "logT": r"$\log(T)$",
     "entropy": r"$S$",
     "mass": r"$M/M_{\odot}$",
-    "logR": r"$\log(R)$",
+    "logR": r"$\log(R/R_{\odot})$",
     "logRho": r"$\log(\rho)$",
     "logP": r"$\log(P)$",
-    "logT": r"$\log(T/T_{\odot})$",
+    "star_age": "Star Age [yr]",
+    "star_mass": r"$M/M_{\odot}$",
+    "logL": r"$\log(L/L_{\odot})$",
 }
+
 
 def pretty_axis_name(axis: str) -> str:
     return pretty_axises.get(axis, axis)
+
 
 def get_line_kwargs(name: str, base_colors: dict) -> tuple[dict, bool, str]:
     plot_name = parse_name_for_plots(name)

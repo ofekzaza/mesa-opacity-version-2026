@@ -1,5 +1,6 @@
 import json
 
+import evolution_graph
 import generic_last_log_plot
 import HEAT_MAP
 import hr_diagram_script
@@ -126,6 +127,11 @@ for mass, names in folders_for_graphs.items():
             hr_diagram_script.plot_hr_diagram(mass, phase_names, phase=phase)
         except Exception as e:
             print(f"    hr_diagram_script failed: {e}")
+
+        try:
+            evolution_graph.plot(mass, phase_names, y_axis="mass", phase=phase)
+        except Exception as e:
+            print(f"    evolution_graph failed: {e}")
 
     # Individual per-folder plots
     for name, phase in grouped:
