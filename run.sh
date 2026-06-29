@@ -67,7 +67,6 @@ for dir in "${DIRS[@]}"; do
         TOTAL_SEC=$((END_EPOCH - START_EPOCH))
         TOTAL_TIME=$(printf "%02d:%02d:%02d" $((TOTAL_SEC/3600)) $((TOTAL_SEC%3600/60)) $((TOTAL_SEC%60)))
         echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, TotalTime: $TOTAL_TIME, ExitCode: $MK_EXIT_CODE" >> "$LOG_FILE"
-        [ $TOTAL_SEC -lt 1200 ] && echo "===WARNING===" >> "$LOG_FILE"
 
         if [ $MK_EXIT_CODE -eq 0 ]; then
             CMD="./rn"
