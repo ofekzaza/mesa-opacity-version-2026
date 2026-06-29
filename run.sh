@@ -58,20 +58,30 @@ for dir in "${DIRS[@]}"; do
 
         CMD="./mk"
         START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+        START_EPOCH=$(date +%s)
         echo "Running $CMD..." >> "$LOG_FILE"
         $CMD
         MK_EXIT_CODE=$?
+        END_EPOCH=$(date +%s)
         END_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-        echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, ExitCode: $MK_EXIT_CODE" >> "$LOG_FILE"
+        TOTAL_SEC=$((END_EPOCH - START_EPOCH))
+        TOTAL_TIME=$(printf "%02d:%02d:%02d" $((TOTAL_SEC/3600)) $((TOTAL_SEC%3600/60)) $((TOTAL_SEC%60)))
+        echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, TotalTime: $TOTAL_TIME, ExitCode: $MK_EXIT_CODE" >> "$LOG_FILE"
+        [ $TOTAL_SEC -lt 1200 ] && echo "===WARNING===" >> "$LOG_FILE"
 
         if [ $MK_EXIT_CODE -eq 0 ]; then
             CMD="./rn"
             START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
+            START_EPOCH=$(date +%s)
             echo "Running $CMD..." >> "$LOG_FILE"
             $CMD
             RN_EXIT_CODE=$?
+            END_EPOCH=$(date +%s)
             END_TIME=$(date "+%Y-%m-%d %H:%M:%S")
-            echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, ExitCode: $RN_EXIT_CODE" >> "$LOG_FILE"
+            TOTAL_SEC=$((END_EPOCH - START_EPOCH))
+            TOTAL_TIME=$(printf "%02d:%02d:%02d" $((TOTAL_SEC/3600)) $((TOTAL_SEC%3600/60)) $((TOTAL_SEC%60)))
+            echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, TotalTime: $TOTAL_TIME, ExitCode: $RN_EXIT_CODE" >> "$LOG_FILE"
+            [ $TOTAL_SEC -lt 1200 ] && echo "===WARNING===" >> "$LOG_FILE"
         else
             echo "Skipping ./rn because ./mk failed in $dir" >> "$LOG_FILE"
             echo "Folder: $dir, Command: ./rn, Start: -, End: -, Status: SKIPPED (mk failed)" >> "$LOG_FILE"
