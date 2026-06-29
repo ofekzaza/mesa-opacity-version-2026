@@ -163,6 +163,7 @@
             ierr = 0
             call star_ptr(id, s, ierr)
             if (ierr /= 0) return
+            extras_check_model = keep_going
             ! if (.false. .and. s% star_mass_h1 < 0.35d0) then
             !    ! stop when star hydrogen mass drops to specified level
             !    extras_check_model = terminate

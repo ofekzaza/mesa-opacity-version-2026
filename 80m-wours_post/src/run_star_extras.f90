@@ -51,7 +51,7 @@
            type (star_info), pointer :: s
 
            integer :: i
-           real(8) :: ratio, opacity_target, speed
+           real(8) :: ratio, opacity_target
            real(8), parameter :: alpha = 0.1
            real(8), parameter :: threshold = 0.80d0
            real(8), parameter :: pi = 3.141592653589893d0
@@ -81,12 +81,8 @@
                   end if
                end if
 
-               speed = alpha
-               ! if (ratio > threshold) then
-               !    speed = alpha * ratio / threshold
-               ! end if
 
-               extra_opacity_factor_memory_target(i) = extra_opacity_factor_memory_target(i) * (1 - speed ) + speed * opacity_target
+               extra_opacity_factor_memory_target(i) = extra_opacity_factor_memory_target(i) * (1 - alpha ) + alpha * opacity_target
 
                s% extra_opacity_factor(i) = extra_opacity_factor_memory_target(i)
            end do
@@ -338,6 +334,7 @@
             ierr = 0
             call star_ptr(id, s, ierr)
             if (ierr /= 0) return
+            extras_check_model = keep_going
             ! if (.false. .and. s% star_mass_h1 < 0.35d0) then
             !    ! stop when star hydrogen mass drops to specified level
             !    extras_check_model = terminate
