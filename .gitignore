@@ -14,3 +14,4 @@ make/run_star.extras.smod
 make/run_star.o
 make/run.o
 make/run_star.mod
+LOGS/
