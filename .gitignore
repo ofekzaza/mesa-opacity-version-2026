@@ -8,10 +8,11 @@
 backup.git/
 tmp.json
 star
-make/run_star_extras.mod
-make/run_star_extras.o
-make/run_star.extras.smod
-make/run_star.o
-make/run.o
-make/run_star.mod
+**/make/run_star_extras.mod
+**/make/run_star_extras.o
+**/make/run_star.extras.smod
+**/make/run_star_extras.smod
+**/make/run_star.o
+**/make/run.o
+**/make/run_star.mod
 LOGS/
