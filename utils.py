@@ -7,7 +7,7 @@ REPLACE_DICT = {
     "_reduction": "_winds",
     "_": " ",
     "-": " ",
-    "a=": r"$\alpha=$",
+    "a=": "α=",
     "mlt++": "MLT++",
     "Ledd": r"$L_{edd}$",
     "normal": "default",

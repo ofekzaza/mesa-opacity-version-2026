@@ -6,7 +6,7 @@ import numpy as np
 
 import utils
 
-KEY_ISOS = ["h1", "he4", "c12", "n14", "o16", "ne20", "mg24"]
+KEY_ISOS = ["h1", "he4", "c12", "n14", "o16", "ne20", "mg24", "si28", "s32", "ar36", "ca40", "fe52", "fe54", "fe56"]
 ISO_LABELS = {
     "h1": r"H",
     "he3": r"$^3$He",
@@ -17,6 +17,12 @@ ISO_LABELS = {
     "ne20": r"$^{20}$Ne",
     "mg24": r"$^{24}$Mg",
     "si28": r"$^{28}$Si",
+    "s32": r"$^{32}$S",
+    "ar36": r"$^{36}$Ar",
+    "ca40": r"$^{40}$Ca",
+    "fe52": r"$^{52}$Fe",
+    "fe54": r"$^{54}$Fe",
+    "fe56": r"$^{56}$Fe",
 }
 ISO_COLORS = {
     "h1": "#1f77b4",
@@ -28,6 +34,12 @@ ISO_COLORS = {
     "ne20": "#8c564b",
     "mg24": "#e377c2",
     "si28": "#7f7f7f",
+    "s32": "#bcbd22",
+    "ar36": "#17becf",
+    "ca40": "#9edae5",
+    "fe52": "#dbdb8d",
+    "fe54": "#c5b0d5",
+    "fe56": "#f15854",
 }
 
 
