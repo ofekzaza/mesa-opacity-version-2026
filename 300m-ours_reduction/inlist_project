@@ -55,10 +55,10 @@
    ! when to stop — end at ZAMS (nuclear luminosity reaches 99% of surface L)
     !stop_near_zams = .true.
     
-    stop_at_phase_Si_Burn = .true. ! lets run it until it is broken
+    stop_at_phase_O_Burn = .true. ! lets run it until it is broken
 
     ! stop_at_phase_C_Burn = .true.
-    ! stop_at_phase_O_Burn = .true.
+    ! stop_at_phase_Si_Burn = .true.
     ! stop_at_phase_WDCS = .true.
 
    !! stop when the star nears ZAMS (Lnuc/L > 0.99)

@@ -54,7 +54,7 @@
 
 
     stop_at_phase_C_Burn = .true.
-    ! stop_at_phase_O_Burn = .true.
+    ! stop_at_phase_Si_Burn = .true.
     ! stop_at_phase_WDCS = .true.
 
    !! stop when the star nears ZAMS (Lnuc/L > 0.99)
