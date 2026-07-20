@@ -29,7 +29,7 @@ pretty_axises = {
     "log_L_div_Ledd": r"$\log(L/L_{edd})$",
     "log_opacity": r"$\log(\kappa)$",
     "extra_opacity_factor": "extra opacity factor",
-    "logT": r"$\log(T)$",
+    "logT": r"$\log(T)$ [K]",
     "entropy": r"$S$",
     "mass": r"$M/M_{\odot}$",
     "logR": r"$\log(R/R_{\odot})$",
@@ -38,6 +38,7 @@ pretty_axises = {
     "star_age": "Star Age [yr]",
     "star_mass": r"$M/M_{\odot}$",
     "logL": r"$\log(L/L_{\odot})$",
+    "R": r"$R/R_{\odot}$",
 }
 
 

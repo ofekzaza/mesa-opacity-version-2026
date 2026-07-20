@@ -88,6 +88,9 @@ folders_for_graphs = {
         "supereduction_a=2_reduction",
         "supereduction_a=2_reduction_post",
     ],
+    300: [
+        "ours_reduction",
+    ],
 }
 
 for mass, names in folders_for_graphs.items():
@@ -109,7 +112,7 @@ for mass, names in folders_for_graphs.items():
         print(f"  comparison plots for phase={phase}: {phase_names}")
 
         try:
-            generic_last_log_plot.plot(mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase, y_axis="logRho", y_units="g/cm³")
+            generic_last_log_plot.plot(mass, phase_names, x_axis="R", x_units="", phase=phase, y_axis="logRho", y_units="g/cm³")
             generic_last_log_plot.plot_generic_last_log_plot(
                 mass, phase_names, phase=phase
             )
@@ -118,7 +121,7 @@ for mass, names in folders_for_graphs.items():
 
         try:
             generic_last_log_plot.plot_generic_last_log_plot(
-                mass, phase_names, x_axis="logR", x_units="R\u2609", phase=phase, inverse_x=True
+                mass, phase_names, x_axis="logR", x_units="", phase=phase, inverse_x=True
             )
         except Exception as e:
             print(f"    generic_last_log_plot(logR) failed: {e}")
