@@ -49,6 +49,7 @@ DIRS=(
     100m-ours_reduction_post
     100m-supereduction_a=2_reduction
     100m-supereduction_a=2_reduction_post
+    300m-ours_reduction
 )
 
 for dir in "${DIRS[@]}"; do
