@@ -1,246 +1,225 @@
-Entering 30m-mlt++
+Starting run at Tue Jul 21 12:14:28 IDT 2026
+Entering 10m-ours_reduction
 Running ./mk...
-Folder: 30m-mlt++, Command: ./mk, Start: 2025-12-13 14:05:36, End: 2025-12-13 14:05:37, ExitCode: 0
+Folder: 10m-ours_reduction, Command: ./mk, Start: 2026-07-21 12:14:28, End: 2026-07-21 12:14:32, TotalTime: 00:00:04, ExitCode: 0
 Running ./rn...
-Entering 30m-mlt++
+Folder: 10m-ours_reduction, Command: ./rn, Start: 2026-07-21 12:14:32, End: 2026-07-21 12:29:22, TotalTime: 00:14:50, ExitCode: 0, TermCode: phase_C_Burn
+===WARNING===
+Entering 10m-ours_reduction_post
 Running ./mk...
-Folder: 30m-mlt++, Command: ./mk, Start: 2025-12-13 14:17:49, End: 2025-12-13 14:17:50, ExitCode: 0
+Folder: 10m-ours_reduction_post, Command: ./mk, Start: 2026-07-21 12:29:22, End: 2026-07-21 12:29:24, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-mlt++, Command: ./rn, Start: 2025-12-13 14:17:50, End: 2025-12-13 15:44:18, ExitCode: 0
-Entering 30m-normal
+Folder: 10m-ours_reduction_post, Command: ./rn, Start: 2026-07-21 12:29:24, End: 2026-07-21 12:39:43, TotalTime: 00:10:19, ExitCode: 0, TermCode: phase_C_Burn
+===WARNING===
+Entering 10m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 30m-normal, Command: ./mk, Start: 2025-12-13 15:44:18, End: 2025-12-13 15:44:20, ExitCode: 0
+Folder: 10m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-21 12:39:43, End: 2026-07-21 12:39:45, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-normal, Command: ./rn, Start: 2025-12-13 15:44:20, End: 2025-12-13 16:46:06, ExitCode: 0
-Entering 30m-ours
+Folder: 10m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-21 12:39:45, End: 2026-07-21 12:52:16, TotalTime: 00:12:31, ExitCode: 0, TermCode: phase_C_Burn
+===WARNING===
+Entering 10m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 30m-ours, Command: ./mk, Start: 2025-12-13 16:46:06, End: 2025-12-13 16:46:07, ExitCode: 0
+Folder: 10m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-21 12:52:16, End: 2026-07-21 12:52:18, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Entering 30m-ours
+Folder: 10m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-21 12:52:18, End: 2026-07-21 13:02:33, TotalTime: 00:10:15, ExitCode: 0, TermCode: phase_C_Burn
+===WARNING===
+Entering 20m-ours_reduction
 Running ./mk...
-Folder: 30m-ours, Command: ./mk, Start: 2025-12-15 00:22:33, End: 2025-12-15 00:22:35, ExitCode: 0
+Folder: 20m-ours_reduction, Command: ./mk, Start: 2026-07-21 13:02:33, End: 2026-07-21 13:02:35, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-ours, Command: ./rn, Start: 2025-12-15 00:22:35, End: 2025-12-15 01:15:09, ExitCode: 0
-Entering 30m-supereduction_a=2
+Folder: 20m-ours_reduction, Command: ./rn, Start: 2026-07-21 13:02:35, End: 2026-07-21 13:26:57, TotalTime: 00:24:22, ExitCode: 0, TermCode: phase_C_Burn
+Entering 20m-ours_reduction_post
 Running ./mk...
-Folder: 30m-supereduction_a=2, Command: ./mk, Start: 2025-12-15 01:15:09, End: 2025-12-15 01:15:11, ExitCode: 0
+Folder: 20m-ours_reduction_post, Command: ./mk, Start: 2026-07-21 13:26:57, End: 2026-07-21 13:26:59, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-supereduction_a=2, Command: ./rn, Start: 2025-12-15 01:15:11, End: 2025-12-15 02:28:03, ExitCode: 0
-Entering 30m-supereduction_a=5
+Folder: 20m-ours_reduction_post, Command: ./rn, Start: 2026-07-21 13:26:59, End: 2026-07-21 13:47:52, TotalTime: 00:20:53, ExitCode: 0, TermCode: phase_C_Burn
+Entering 20m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 30m-supereduction_a=5, Command: ./mk, Start: 2025-12-15 02:28:03, End: 2025-12-15 02:28:05, ExitCode: 0
+Folder: 20m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-21 13:47:52, End: 2026-07-21 13:47:54, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-supereduction_a=5, Command: ./rn, Start: 2025-12-15 02:28:05, End: 2025-12-15 03:28:45, ExitCode: 0
-Entering 40m-mlt++
+Folder: 20m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-21 13:47:54, End: 2026-07-21 14:09:54, TotalTime: 00:22:00, ExitCode: 0, TermCode: phase_C_Burn
+Entering 20m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 40m-mlt++, Command: ./mk, Start: 2025-12-15 03:28:45, End: 2025-12-15 03:28:47, ExitCode: 0
+Folder: 20m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-21 14:09:54, End: 2026-07-21 14:09:56, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-mlt++, Command: ./rn, Start: 2025-12-15 03:28:47, End: 2025-12-15 04:34:29, ExitCode: 0
-Entering 40m-normal
+Folder: 20m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-21 14:09:56, End: 2026-07-21 14:29:56, TotalTime: 00:20:00, ExitCode: 0, TermCode: phase_C_Burn
+Entering 30m-ours_reduction
 Running ./mk...
-Folder: 40m-normal, Command: ./mk, Start: 2025-12-15 04:34:29, End: 2025-12-15 04:34:31, ExitCode: 0
+Folder: 30m-ours_reduction, Command: ./mk, Start: 2026-07-21 14:29:56, End: 2026-07-21 14:29:58, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-normal, Command: ./rn, Start: 2025-12-15 04:34:31, End: 2025-12-15 05:09:51, ExitCode: 0
-Entering 40m-ours
+Folder: 30m-ours_reduction, Command: ./rn, Start: 2026-07-21 14:29:58, End: 2026-07-21 15:13:57, TotalTime: 00:43:59, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-ours_reduction_post
 Running ./mk...
-Folder: 40m-ours, Command: ./mk, Start: 2025-12-15 05:09:51, End: 2025-12-15 05:09:53, ExitCode: 0
+Folder: 30m-ours_reduction_post, Command: ./mk, Start: 2026-07-21 15:13:57, End: 2026-07-21 15:13:59, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-ours, Command: ./rn, Start: 2025-12-15 05:09:53, End: 2025-12-15 05:48:48, ExitCode: 0
-Entering 40m-supereduction_a=2
+Folder: 30m-ours_reduction_post, Command: ./rn, Start: 2026-07-21 15:13:59, End: 2026-07-21 15:56:41, TotalTime: 00:42:42, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 40m-supereduction_a=2, Command: ./mk, Start: 2025-12-15 05:48:48, End: 2025-12-15 05:48:50, ExitCode: 0
+Folder: 30m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-21 15:56:41, End: 2026-07-21 15:56:43, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-supereduction_a=2, Command: ./rn, Start: 2025-12-15 05:48:50, End: 2025-12-15 06:19:32, ExitCode: 0
-Entering 40m-supereduction_a=5
+Folder: 30m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-21 15:56:43, End: 2026-07-21 16:37:14, TotalTime: 00:40:31, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 40m-supereduction_a=5, Command: ./mk, Start: 2025-12-15 06:19:32, End: 2025-12-15 06:19:35, ExitCode: 0
+Folder: 30m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-21 16:37:14, End: 2026-07-21 16:37:16, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-supereduction_a=5, Command: ./rn, Start: 2025-12-15 06:19:35, End: 2025-12-15 06:23:18, ExitCode: 0
-
-
-# new Running
-
-
-Entering 30m-ours
+Folder: 30m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-21 16:37:16, End: 2026-07-21 17:06:16, TotalTime: 00:29:00, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-normal_reduction
 Running ./mk...
-Folder: 30m-ours, Command: ./mk, Start: 2025-12-17 18:35:04, End: 2025-12-17 18:35:07, ExitCode: 0
+Folder: 30m-normal_reduction, Command: ./mk, Start: 2026-07-21 17:06:16, End: 2026-07-21 17:06:18, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-ours, Command: ./rn, Start: 2025-12-17 18:35:07, End: 2025-12-17 19:07:51, ExitCode: 0
-Entering 30m-mlt++
+Folder: 30m-normal_reduction, Command: ./rn, Start: 2026-07-21 17:06:18, End: 2026-07-21 17:37:00, TotalTime: 00:30:42, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-normal_reduction_post
 Running ./mk...
-Folder: 30m-mlt++, Command: ./mk, Start: 2025-12-17 19:07:51, End: 2025-12-17 19:07:53, ExitCode: 0
+Folder: 30m-normal_reduction_post, Command: ./mk, Start: 2026-07-21 17:37:00, End: 2026-07-21 17:37:02, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-mlt++, Command: ./rn, Start: 2025-12-17 19:07:53, End: 2025-12-17 20:14:59, ExitCode: 0
-Entering 30m-normal
+Folder: 30m-normal_reduction_post, Command: ./rn, Start: 2026-07-21 17:37:02, End: 2026-07-21 18:17:07, TotalTime: 00:40:05, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-mlt++_reduction
 Running ./mk...
-Folder: 30m-normal, Command: ./mk, Start: 2025-12-17 20:14:59, End: 2025-12-17 20:15:00, ExitCode: 0
+Folder: 30m-mlt++_reduction, Command: ./mk, Start: 2026-07-21 18:17:07, End: 2026-07-21 18:17:09, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-normal, Command: ./rn, Start: 2025-12-17 20:15:00, End: 2025-12-17 20:44:14, ExitCode: 0
-Entering 30m-supereduction_a=2
+Folder: 30m-mlt++_reduction, Command: ./rn, Start: 2026-07-21 18:17:09, End: 2026-07-21 18:57:07, TotalTime: 00:39:58, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 30m-mlt++_reduction_post
 Running ./mk...
-Folder: 30m-supereduction_a=2, Command: ./mk, Start: 2025-12-17 20:44:14, End: 2025-12-17 20:44:15, ExitCode: 0
+Folder: 30m-mlt++_reduction_post, Command: ./mk, Start: 2026-07-21 18:57:07, End: 2026-07-21 18:57:09, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-supereduction_a=2, Command: ./rn, Start: 2025-12-17 20:44:15, End: 2025-12-17 21:11:34, ExitCode: 0
-Entering 30m-supereduction_a=5
+Folder: 30m-mlt++_reduction_post, Command: ./rn, Start: 2026-07-21 18:57:09, End: 2026-07-21 19:36:04, TotalTime: 00:38:55, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 40m-ours_reduction
 Running ./mk...
-Folder: 30m-supereduction_a=5, Command: ./mk, Start: 2025-12-17 21:11:34, End: 2025-12-17 21:11:36, ExitCode: 0
+Folder: 40m-ours_reduction, Command: ./mk, Start: 2026-07-21 19:36:04, End: 2026-07-21 19:36:06, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 30m-supereduction_a=5, Command: ./rn, Start: 2025-12-17 21:11:36, End: 2025-12-17 21:49:53, ExitCode: 0
-Entering 40m-ours
+Folder: 40m-ours_reduction, Command: ./rn, Start: 2026-07-21 19:36:06, End: 2026-07-21 20:31:24, TotalTime: 00:55:18, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 40m-ours_reduction_post
 Running ./mk...
-Folder: 40m-ours, Command: ./mk, Start: 2025-12-17 21:49:53, End: 2025-12-17 21:49:55, ExitCode: 0
+Folder: 40m-ours_reduction_post, Command: ./mk, Start: 2026-07-21 20:31:24, End: 2026-07-21 20:31:26, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-ours, Command: ./rn, Start: 2025-12-17 21:49:55, End: 2025-12-17 22:28:08, ExitCode: 0
-Entering 40m-normal
+Folder: 40m-ours_reduction_post, Command: ./rn, Start: 2026-07-21 20:31:26, End: 2026-07-21 21:26:26, TotalTime: 00:55:00, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 40m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 40m-normal, Command: ./mk, Start: 2025-12-17 22:28:08, End: 2025-12-17 22:28:10, ExitCode: 0
+Folder: 40m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-21 21:26:26, End: 2026-07-21 21:26:28, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-normal, Command: ./rn, Start: 2025-12-17 22:28:10, End: 2025-12-17 23:04:28, ExitCode: 0
-Entering 40m-mlt++
+Folder: 40m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-21 21:26:28, End: 2026-07-21 22:19:34, TotalTime: 00:53:06, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 40m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 40m-mlt++, Command: ./mk, Start: 2025-12-17 23:04:28, End: 2025-12-17 23:04:29, ExitCode: 0
+Folder: 40m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-21 22:19:34, End: 2026-07-21 22:19:36, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-mlt++, Command: ./rn, Start: 2025-12-17 23:04:29, End: 2025-12-18 00:10:42, ExitCode: 0
-Entering 40m-supereduction_a=2
+Folder: 40m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-21 22:19:36, End: 2026-07-21 23:20:00, TotalTime: 01:00:24, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 50m-ours_reduction
 Running ./mk...
-Folder: 40m-supereduction_a=2, Command: ./mk, Start: 2025-12-18 00:10:42, End: 2025-12-18 00:10:44, ExitCode: 0
+Folder: 50m-ours_reduction, Command: ./mk, Start: 2026-07-21 23:20:00, End: 2026-07-21 23:20:02, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 40m-supereduction_a=2, Command: ./rn, Start: 2025-12-18 00:10:44, End: 2025-12-18 00:41:24, ExitCode: 0
-Entering 50m-ours
+Folder: 50m-ours_reduction, Command: ./rn, Start: 2026-07-21 23:20:02, End: 2026-07-22 00:43:52, TotalTime: 01:23:50, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 50m-ours_reduction_post
 Running ./mk...
-Folder: 50m-ours, Command: ./mk, Start: 2025-12-18 00:41:24, End: 2025-12-18 00:41:27, ExitCode: 0
+Folder: 50m-ours_reduction_post, Command: ./mk, Start: 2026-07-22 00:43:52, End: 2026-07-22 00:43:54, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 50m-ours, Command: ./rn, Start: 2025-12-18 00:41:27, End: 2025-12-18 01:25:56, ExitCode: 0
-Entering 50m-mlt++
+Folder: 50m-ours_reduction_post, Command: ./rn, Start: 2026-07-22 00:43:54, End: 2026-07-22 02:08:37, TotalTime: 01:24:43, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 50m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 50m-mlt++, Command: ./mk, Start: 2025-12-18 01:25:56, End: 2025-12-18 01:25:58, ExitCode: 0
+Folder: 50m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-22 02:08:37, End: 2026-07-22 02:08:39, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 50m-mlt++, Command: ./rn, Start: 2025-12-18 01:25:58, End: 2025-12-18 02:27:49, ExitCode: 0
-Entering 50m-normal
+Folder: 50m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-22 02:08:39, End: 2026-07-22 03:30:28, TotalTime: 01:21:49, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 50m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 50m-normal, Command: ./mk, Start: 2025-12-18 02:27:49, End: 2025-12-18 02:27:52, ExitCode: 0
+Folder: 50m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-22 03:30:28, End: 2026-07-22 03:30:30, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 50m-normal, Command: ./rn, Start: 2025-12-18 02:27:52, End: 2025-12-18 03:10:17, ExitCode: 0
-Entering 50m-supereduction_a=2
-Running ./mk...
-Folder: 50m-supereduction_a=2, Command: ./mk, Start: 2025-12-18 03:10:17, End: 2025-12-18 03:10:19, ExitCode: 0
-Running ./rn...
-Folder: 50m-supereduction_a=2, Command: ./rn, Start: 2025-12-18 03:10:19, End: 2025-12-18 03:46:36, ExitCode: 0
-Entering 60m-ours
-Running ./mk...
-Folder: 60m-ours, Command: ./mk, Start: 2025-12-19 09:01:58, End: 2025-12-19 09:02:00, ExitCode: 0
-Running ./rn...
-Entering 60m-ours
-Running ./mk...
-Folder: 60m-ours, Command: ./mk, Start: 2025-12-19 18:25:24, End: 2025-12-19 18:25:28, ExitCode: 0
-Running ./rn...
-Entering 60m-ours
-Running ./mk...
-Folder: 60m-ours, Command: ./mk, Start: 2025-12-19 18:56:32, End: 2025-12-19 18:56:34, ExitCode: 0
-Running ./rn...
-Folder: 60m-ours, Command: ./rn, Start: 2025-12-19 18:56:34, End: 2025-12-19 19:45:00, ExitCode: 0
-Entering 50m-ours
-Running ./mk...
-Folder: 50m-ours, Command: ./mk, Start: 2025-12-19 19:45:00, End: 2025-12-19 19:45:02, ExitCode: 0
-Running ./rn...
-Folder: 50m-ours, Command: ./rn, Start: 2025-12-19 19:45:02, End: 2025-12-19 20:35:39, ExitCode: 0
-Entering 30m-ours
-Running ./mk...
-Folder: 30m-ours, Command: ./mk, Start: 2025-12-19 20:35:39, End: 2025-12-19 20:35:41, ExitCode: 0
-Running ./rn...
-Folder: 30m-ours, Command: ./rn, Start: 2025-12-19 20:35:41, End: 2025-12-19 21:09:26, ExitCode: 0
-Entering 60m-supereduction_a=2
-Running ./mk...
-Folder: 60m-supereduction_a=2, Command: ./mk, Start: 2025-12-19 21:09:26, End: 2025-12-19 21:09:28, ExitCode: 0
-Running ./rn...
-Folder: 60m-supereduction_a=2, Command: ./rn, Start: 2025-12-19 21:09:28, End: 2025-12-19 21:46:38, ExitCode: 0
-Entering 60m-mlt++
-Running ./mk...
-Folder: 60m-mlt++, Command: ./mk, Start: 2025-12-19 21:46:38, End: 2025-12-19 21:46:40, ExitCode: 0
-Running ./rn...
-Folder: 60m-mlt++, Command: ./rn, Start: 2025-12-19 21:46:40, End: 2025-12-19 22:27:45, ExitCode: 0
-Entering 60m-normal
-Running ./mk...
-Folder: 60m-normal, Command: ./mk, Start: 2025-12-19 22:27:45, End: 2025-12-19 22:27:47, ExitCode: 0
-Running ./rn...
-Folder: 60m-normal, Command: ./rn, Start: 2025-12-19 22:27:47, End: 2025-12-19 23:15:08, ExitCode: 0
-Entering 80m-ours
-Running ./mk...
-Folder: 80m-ours, Command: ./mk, Start: 2025-12-29 20:59:12, End: 2025-12-29 20:59:16, ExitCode: 0
-Running ./rn...
-Folder: 80m-ours, Command: ./rn, Start: 2025-12-29 20:59:16, End: 2025-12-29 22:32:06, ExitCode: 0
-Entering 80m-supereduction_a=2
-Running ./mk...
-Folder: 80m-supereduction_a=2, Command: ./mk, Start: 2025-12-29 22:32:06, End: 2025-12-29 22:32:07, ExitCode: 0
-Running ./rn...
-Folder: 80m-supereduction_a=2, Command: ./rn, Start: 2025-12-29 22:32:07, End: 2025-12-29 23:14:41, ExitCode: 0
-Entering 120m-ours
-Running ./mk...
-Folder: 120m-ours, Command: ./mk, Start: 2025-12-29 23:14:41, End: 2025-12-29 23:14:44, ExitCode: 0
-Running ./rn...
-Entering 120m-ours
-Running ./mk...
-Folder: 120m-ours, Command: ./mk, Start: 2025-12-30 00:08:14, End: 2025-12-30 00:08:15, ExitCode: 0
-Running ./rn...
-Entering 120m-ours
-Running ./mk...
-Folder: 120m-ours, Command: ./mk, Start: 2025-12-30 00:09:33, End: 2025-12-30 00:09:35, ExitCode: 0
-Running ./rn...
-Entering 120m-ours
-Running ./mk...
-Folder: 120m-ours, Command: ./mk, Start: 2025-12-30 00:24:37, End: 2025-12-30 00:24:39, ExitCode: 0
-Running ./rn...
-Entering 120m-ours
-Running ./mk...
-Folder: 120m-ours, Command: ./mk, Start: 2025-12-30 15:44:58, End: 2025-12-30 15:44:59, ExitCode: 0
-Running ./rn...
+Folder: 50m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-22 03:30:30, End: 2026-07-22 04:47:20, TotalTime: 01:16:50, ExitCode: 0, TermCode: phase_Si_Burn
 Entering 60m-ours_reduction
 Running ./mk...
-Folder: 60m-ours_reduction, Command: ./mk, Start: 2026-01-05 18:55:33, End: 2026-01-05 18:55:36, ExitCode: 0
+Folder: 60m-ours_reduction, Command: ./mk, Start: 2026-07-22 04:47:20, End: 2026-07-22 04:47:22, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Entering 60m-ours_reduction
+Folder: 60m-ours_reduction, Command: ./rn, Start: 2026-07-22 04:47:22, End: 2026-07-22 06:45:31, TotalTime: 01:58:09, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 60m-ours_reduction_post
 Running ./mk...
-Folder: 60m-ours_reduction, Command: ./mk, Start: 2026-01-05 22:53:05, End: 2026-01-05 22:53:07, ExitCode: 0
+Folder: 60m-ours_reduction_post, Command: ./mk, Start: 2026-07-22 06:45:31, End: 2026-07-22 06:45:33, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Entering 60m-ours_reduction
+Folder: 60m-ours_reduction_post, Command: ./rn, Start: 2026-07-22 06:45:33, End: 2026-07-22 08:33:53, TotalTime: 01:48:20, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 60m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 60m-ours_reduction, Command: ./mk, Start: 2026-01-06 01:53:45, End: 2026-01-06 01:53:46, ExitCode: 0
+Folder: 60m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-22 08:33:53, End: 2026-07-22 08:33:55, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Entering 80m-ours
+Folder: 60m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-22 08:33:55, End: 2026-07-22 10:14:32, TotalTime: 01:40:37, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 60m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 80m-ours, Command: ./mk, Start: 2026-01-11 20:57:39, End: 2026-01-11 20:57:40, ExitCode: 0
+Folder: 60m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-22 10:14:33, End: 2026-07-22 10:14:35, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-ours, Command: ./rn, Start: 2026-01-11 20:57:40, End: 2026-01-11 21:56:29, ExitCode: 0
+Folder: 60m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-22 10:14:35, End: 2026-07-22 11:52:45, TotalTime: 01:38:10, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 70m-ours_reduction
+Running ./mk...
+Folder: 70m-ours_reduction, Command: ./mk, Start: 2026-07-22 11:52:45, End: 2026-07-22 11:52:47, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 70m-ours_reduction, Command: ./rn, Start: 2026-07-22 11:52:47, End: 2026-07-22 14:17:39, TotalTime: 02:24:52, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 70m-ours_reduction_post
+Running ./mk...
+Folder: 70m-ours_reduction_post, Command: ./mk, Start: 2026-07-22 14:17:39, End: 2026-07-22 14:17:41, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 70m-ours_reduction_post, Command: ./rn, Start: 2026-07-22 14:17:41, End: 2026-07-22 16:40:19, TotalTime: 02:22:38, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 70m-supereduction_a=2_reduction
+Running ./mk...
+Folder: 70m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-22 16:40:19, End: 2026-07-22 16:40:21, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 70m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-22 16:40:21, End: 2026-07-22 18:38:46, TotalTime: 01:58:25, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 70m-supereduction_a=2_reduction_post
+Running ./mk...
+Folder: 70m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-22 18:38:46, End: 2026-07-22 18:38:48, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 70m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-22 18:38:48, End: 2026-07-22 20:50:11, TotalTime: 02:11:23, ExitCode: 0, TermCode: min_timestep_limit
 Entering 80m-ours_reduction
 Running ./mk...
-Folder: 80m-ours_reduction, Command: ./mk, Start: 2026-01-11 21:56:29, End: 2026-01-11 21:56:30, ExitCode: 0
+Folder: 80m-ours_reduction, Command: ./mk, Start: 2026-07-22 20:50:11, End: 2026-07-22 20:50:13, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-ours_reduction, Command: ./rn, Start: 2026-01-11 21:56:30, End: 2026-01-12 08:42:07, ExitCode: 0
-Entering 80m-ours
+Folder: 80m-ours_reduction, Command: ./rn, Start: 2026-07-22 20:50:13, End: 2026-07-22 23:51:42, TotalTime: 03:01:29, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 80m-ours_reduction_post
 Running ./mk...
-
-# new Running
-
-Folder: 80m-ours, Command: ./mk, Start: 2026-05-29 11:17:14, End: 2026-05-29 11:17:15, ExitCode: 0
+Folder: 80m-ours_reduction_post, Command: ./mk, Start: 2026-07-22 23:51:42, End: 2026-07-22 23:51:44, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Starting run at Fri May 29 12:07:38 PM IDT 2026
-Entering 80m-ours_post
+Folder: 80m-ours_reduction_post, Command: ./rn, Start: 2026-07-22 23:51:44, End: 2026-07-23 02:47:41, TotalTime: 02:55:57, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 80m-supereduction_a=2_reduction
 Running ./mk...
-Folder: 80m-ours_post, Command: ./mk, Start: 2026-05-29 12:07:38, End: 2026-05-29 12:07:39, ExitCode: 0
+Folder: 80m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-23 02:47:41, End: 2026-07-23 02:47:43, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-ours_post, Command: ./rn, Start: 2026-05-29 12:07:39, End: 2026-05-29 12:41:35, ExitCode: 0
-Entering 80m-supereduction_a=2_post
+Folder: 80m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-23 02:47:43, End: 2026-07-23 05:22:11, TotalTime: 02:34:28, ExitCode: 0, TermCode: min_timestep_limit
+Entering 80m-supereduction_a=2_reduction_post
 Running ./mk...
-Folder: 80m-supereduction_a=2_post, Command: ./mk, Start: 2026-05-29 12:41:35, End: 2026-05-29 12:41:36, ExitCode: 0
+Folder: 80m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-23 05:22:11, End: 2026-07-23 05:22:13, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-supereduction_a=2_post, Command: ./rn, Start: 2026-05-29 12:41:36, End: 2026-05-29 12:56:37, ExitCode: 0
-Entering 80m-mlt_tdc_only
+Folder: 80m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-23 05:22:13, End: 2026-07-23 07:48:59, TotalTime: 02:26:46, ExitCode: 0, TermCode: min_timestep_limit
+Entering 90m-ours_reduction
 Running ./mk...
-Folder: 80m-mlt_tdc_only, Command: ./mk, Start: 2026-05-29 12:56:37, End: 2026-05-29 12:56:38, ExitCode: 0
+Folder: 90m-ours_reduction, Command: ./mk, Start: 2026-07-23 07:48:59, End: 2026-07-23 07:49:01, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-mlt_tdc_only, Command: ./rn, Start: 2026-05-29 12:56:38, End: 2026-05-29 13:15:45, ExitCode: 0
-Entering 80m-mlt_tdc_only_post
+Folder: 90m-ours_reduction, Command: ./rn, Start: 2026-07-23 07:49:01, End: 2026-07-23 11:48:07, TotalTime: 03:59:06, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 90m-ours_reduction_post
 Running ./mk...
-Folder: 80m-mlt_tdc_only_post, Command: ./mk, Start: 2026-05-29 13:15:45, End: 2026-05-29 13:15:46, ExitCode: 0
+Folder: 90m-ours_reduction_post, Command: ./mk, Start: 2026-07-23 11:48:07, End: 2026-07-23 11:48:09, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
-Folder: 80m-mlt_tdc_only_post, Command: ./rn, Start: 2026-05-29 13:15:46, End: 2026-05-29 13:28:30, ExitCode: 0
+Folder: 90m-ours_reduction_post, Command: ./rn, Start: 2026-07-23 11:48:09, End: 2026-07-23 15:40:27, TotalTime: 03:52:18, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 90m-supereduction_a=2_reduction
+Running ./mk...
+Folder: 90m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-23 15:40:27, End: 2026-07-23 15:40:29, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 90m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-23 15:40:29, End: 2026-07-23 18:45:17, TotalTime: 03:04:48, ExitCode: 0, TermCode: min_timestep_limit
+Entering 90m-supereduction_a=2_reduction_post
+Running ./mk...
+Folder: 90m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-23 18:45:17, End: 2026-07-23 18:45:19, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 90m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-23 18:45:19, End: 2026-07-23 21:47:57, TotalTime: 03:02:38, ExitCode: 0, TermCode: min_timestep_limit
+Entering 100m-ours_reduction
+Running ./mk...
+Folder: 100m-ours_reduction, Command: ./mk, Start: 2026-07-23 21:47:57, End: 2026-07-23 21:47:58, TotalTime: 00:00:01, ExitCode: 0
+Running ./rn...
+Folder: 100m-ours_reduction, Command: ./rn, Start: 2026-07-23 21:47:59, End: 2026-07-24 03:15:12, TotalTime: 05:27:13, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 100m-ours_reduction_post
+Running ./mk...
+Folder: 100m-ours_reduction_post, Command: ./mk, Start: 2026-07-24 03:15:12, End: 2026-07-24 03:15:14, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 100m-ours_reduction_post, Command: ./rn, Start: 2026-07-24 03:15:14, End: 2026-07-24 08:43:29, TotalTime: 05:28:15, ExitCode: 0, TermCode: phase_Si_Burn
+Entering 100m-supereduction_a=2_reduction
+Running ./mk...
+Folder: 100m-supereduction_a=2_reduction, Command: ./mk, Start: 2026-07-24 08:43:29, End: 2026-07-24 08:43:31, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 100m-supereduction_a=2_reduction, Command: ./rn, Start: 2026-07-24 08:43:31, End: 2026-07-24 12:29:44, TotalTime: 03:46:13, ExitCode: 0, TermCode: min_timestep_limit
+Entering 100m-supereduction_a=2_reduction_post
+Running ./mk...
+Folder: 100m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-24 12:29:44, End: 2026-07-24 12:29:46, TotalTime: 00:00:02, ExitCode: 0
+Running ./rn...
+Folder: 100m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-24 12:29:46, End: 2026-07-24 16:13:04, TotalTime: 03:43:18, ExitCode: 0, TermCode: min_timestep_limit
