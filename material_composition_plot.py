@@ -44,7 +44,14 @@ ISO_COLORS = {
 
 
 def _get_valid_isos(prof):
-    return [iso for iso in KEY_ISOS if hasattr(prof, iso)]
+    valid = []
+    for iso in KEY_ISOS:
+        try:
+            getattr(prof, iso)
+            valid.append(iso)
+        except Exception:
+            pass
+    return valid
 
 
 def _get_last_profile_num(path):
