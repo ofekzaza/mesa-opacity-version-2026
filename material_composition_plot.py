@@ -171,20 +171,27 @@ def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
         except Exception:
             continue
 
-        model_numbers.append(float(getattr(p, "model_number")))
-        star_ages.append(float(getattr(p, "star_age")))
-        dm = np.array(getattr(p, "dm"), dtype=float)
-        total_mass = np.sum(dm)
+        try:
+            model_numbers.append(float(getattr(p, "model_number")))
+            star_ages.append(float(getattr(p, "star_age")))
+            dm = np.array(getattr(p, "dm"), dtype=float)
+            total_mass = np.sum(dm)
+        except Exception:
+            continue
 
         for iso in valid_isos:
-            iso_data = np.array(getattr(p, iso), dtype=float)
-            iso_avg[iso].append(np.sum(iso_data * dm) / total_mass)
+            try:
+                iso_data = np.array(getattr(p, iso), dtype=float)
+                iso_avg[iso].append(np.sum(iso_data * dm) / total_mass)
+            except AttributeError:
+                iso_avg[iso].append(np.nan)
 
     if not model_numbers:
         return
 
     model_numbers = np.array(model_numbers)
     star_ages = np.array(star_ages)
+    used_isos = [iso for iso in valid_isos if not all(np.isnan(v) for v in iso_avg[iso])]
     for iso in valid_isos:
         iso_avg[iso] = np.array(iso_avg[iso])
 
@@ -195,7 +202,7 @@ def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
         iso_avg[iso] = iso_avg[iso][sort_idx]
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    for iso in valid_isos:
+    for iso in used_isos:
         ax.plot(
             model_numbers,
             iso_avg[iso],
