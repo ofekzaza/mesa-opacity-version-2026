@@ -145,6 +145,7 @@ for mass, names in folders_for_graphs.items():
         if "ours" in name:
             try:
                 HEAT_MAP.plot_heat_map(mass, name, phase=phase)
+                HEAT_MAP.plot_heat_map(mass, name, phase=phase, value_axis="logT", normalize=False)
             except Exception as e:
                 print(f"    HEAT_MAP({name}) failed: {e}")
 
