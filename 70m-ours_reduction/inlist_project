@@ -44,7 +44,8 @@
    ! see star/defaults/controls.defaults
     terminal_interval = 1000
     max_num_profile_models = 9999
-    history_interval = 25
+    history_interval = 50
+    profile_interval = 50
 
    ! starting specifications
    initial_mass = 70 ! in Msun units
