@@ -45,7 +45,7 @@
     terminal_interval = 1000
     max_num_profile_models = 9999
     history_interval = 100
-    profile_interval = 250
+    profile_interval = 200
     photo_interval = -1
 
    ! starting specifications
@@ -89,6 +89,7 @@
    ! timesteps
     ! time_delta_coeff = 2
     
+    time_delta_coeff = 0.5
 
     ! 1d-3
     varcontrol_target   = 1d-4
@@ -104,23 +105,7 @@
 
    MLT_option = 'TDC'
    okay_to_reduce_gradT_excess = .false.
-   
-   ! 300 mass optimizations:
-   time_delta_coeff = 2
 
-   overshoot_scheme(1) = 'exponential'
-   overshoot_zone_type(1) = 'nonburn'
-   overshoot_zone_loc(1) = 'shell'
-   overshoot_bdy_loc(1) = 'bottom'
-   overshoot_f(1) = 0.128
-   overshoot_f0(1) = 0.100
-
-   overshoot_scheme(2) = 'exponential'
-   overshoot_zone_type(2) = 'any'
-   overshoot_zone_loc(2) = 'any'
-   overshoot_bdy_loc(2) = 'any'
-   overshoot_f(2) = 0.014
-   overshoot_f0(2) = 0.004
 
    ! output
    
