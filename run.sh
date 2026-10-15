@@ -2,6 +2,8 @@
 
 LOG_FILE="$(pwd)/run_log.txt"
 
+export OMP_NUM_THREADS=16
+
 echo "Starting run at $(date)" >> "$LOG_FILE"
 
 DIRS=(
