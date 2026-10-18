@@ -43,7 +43,7 @@ ISO_COLORS = {
 }
 
 
-def _get_valid_isos(prof):
+def _get_valid_isos(prof) -> list[str]:
     valid = []
     for iso in KEY_ISOS:
         try:
@@ -52,20 +52,6 @@ def _get_valid_isos(prof):
         except Exception:
             pass
     return valid
-
-
-def _get_last_profile_num(path):
-    try:
-        hist_dir = mr.MesaLogDir(path)
-        return hist_dir.profile_numbers[-1]
-    except Exception:
-        import glob
-
-        prof_files = sorted(
-            glob.glob(f"{path}/profile*.data"),
-            key=lambda x: int(x.split("profile")[-1].split(".data")[0]),
-        )
-        return int(prof_files[-1].split("profile")[-1].split(".data")[0])
 
 
 def _setup_ax(ax):
@@ -79,18 +65,73 @@ def _finalize_ax(ax):
     ax.set_ylim(bottom=0, top=1)
 
 
-def _plot_abundance_vs_logr(mass: int, name: str, phase: str = ""):
-    path = f"{mass}m-{name}/LOGS"
-    out_dir = f"plot{mass}m_material_composition{'_' + phase if phase else ''}"
-    os.makedirs(out_dir, exist_ok=True)
+# ---------------------------------------------------------------------------
+# Streaming collector
+# ---------------------------------------------------------------------------
 
-    last_profile_num = _get_last_profile_num(path)
-    prof = mr.MesaData(f"{path}/profile{last_profile_num}.data")
+class CompositionEvolutionCollector:
+    """Accumulates mass-weighted isotope averages (scalars) during a streaming pass.
 
+    Only scalars are held in memory after each profile — the full arrays are
+    reduced immediately inside consume() before the MesaData object is discarded.
+    """
+
+    def __init__(self):
+        self.model_numbers: list[float] = []
+        self.star_ages: list[float] = []
+        self.valid_isos: list[str] = []
+        self.iso_avgs: dict[str, list[float]] = {}
+        self._initialized = False
+
+    def consume(self, prof) -> None:
+        # Determine which isotopes are present from the first profile
+        if not self._initialized:
+            self.valid_isos = [iso for iso in KEY_ISOS if hasattr(prof, iso)]
+            self.iso_avgs = {iso: [] for iso in self.valid_isos}
+            self._initialized = True
+
+        try:
+            mn = float(getattr(prof, "model_number"))
+            sa = float(getattr(prof, "star_age"))
+            dm = np.array(getattr(prof, "dm"), dtype=float)
+            total_mass = float(np.sum(dm))
+        except Exception:
+            return
+
+        self.model_numbers.append(mn)
+        self.star_ages.append(sa)
+        for iso in self.valid_isos:
+            try:
+                iso_data = np.array(getattr(prof, iso), dtype=float)
+                self.iso_avgs[iso].append(float(np.sum(iso_data * dm) / total_mass))
+            except Exception:
+                self.iso_avgs[iso].append(float("nan"))
+
+    def render(self, mass: int, name: str, phase: str = "") -> None:
+        if not self.model_numbers:
+            return
+        out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m_material_composition{'_' + phase if phase else ''}"
+        os.makedirs(out_dir, exist_ok=True)
+        _plot_abundance_evolution_from_data(
+            self.model_numbers,
+            self.star_ages,
+            self.iso_avgs,
+            self.valid_isos,
+            mass,
+            name,
+            phase,
+            out_dir,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Snapshot plots (operate on a single pre-loaded last profile)
+# ---------------------------------------------------------------------------
+
+def _plot_abundance_vs_logr(prof, mass: int, name: str, phase: str, out_dir: str) -> None:
     valid_isos = _get_valid_isos(prof)
     if not valid_isos:
         return
-
     fig, ax = plt.subplots(figsize=(8, 6))
     x_data = getattr(prof, "logR", None)
     if x_data is not None:
@@ -105,26 +146,16 @@ def _plot_abundance_vs_logr(mass: int, name: str, phase: str = ""):
         ax.set_xlabel("log(R/R\u2609)")
         _setup_ax(ax)
         _finalize_ax(ax)
-        # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
-
     plt.tight_layout()
     plt.savefig(f"{out_dir}/Mass_{mass}_{name}_abundance_vs_logR.png", dpi=300)
     plt.close()
     print(f"Saved: {out_dir}/Mass_{mass}_{name}_abundance_vs_logR.png")
 
 
-def _plot_abundance_vs_logrho(mass: int, name: str, phase: str = ""):
-    path = f"{mass}m-{name}/LOGS"
-    out_dir = f"plot{mass}m_material_composition{'_' + phase if phase else ''}"
-    os.makedirs(out_dir, exist_ok=True)
-
-    last_profile_num = _get_last_profile_num(path)
-    prof = mr.MesaData(f"{path}/profile{last_profile_num}.data")
-
+def _plot_abundance_vs_logrho(prof, mass: int, name: str, phase: str, out_dir: str) -> None:
     valid_isos = _get_valid_isos(prof)
     if not valid_isos:
         return
-
     fig, ax = plt.subplots(figsize=(8, 6))
     x_data = getattr(prof, "logRho", None)
     if x_data is not None:
@@ -139,73 +170,34 @@ def _plot_abundance_vs_logrho(mass: int, name: str, phase: str = ""):
         ax.set_xlabel("log(\u03c1) [g/cm\u00b3]")
         _setup_ax(ax)
         _finalize_ax(ax)
-        # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
-
     plt.tight_layout()
     plt.savefig(f"{out_dir}/Mass_{mass}_{name}_abundance_vs_logRho.png", dpi=300)
     plt.close()
     print(f"Saved: {out_dir}/Mass_{mass}_{name}_abundance_vs_logRho.png")
 
 
-def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
-    path = f"{mass}m-{name}/LOGS"
-    out_dir = f"plot{mass}m_material_composition{'_' + phase if phase else ''}"
-    os.makedirs(out_dir, exist_ok=True)
-
-    last_profile_num = _get_last_profile_num(path)
-    prof = mr.MesaData(f"{path}/profile{last_profile_num}.data")
-    valid_isos = _get_valid_isos(prof)
-    if not valid_isos:
-        return
-
-    model_numbers = []
-    star_ages = []
-    iso_avg = {iso: [] for iso in valid_isos}
-
-    for i in range(1, 9999):
-        f_path = f"{path}/profile{i}.data"
-        if not os.path.exists(f_path):
-            break
-        try:
-            p = mr.MesaData(f_path)
-        except Exception:
-            continue
-
-        try:
-            model_numbers.append(float(getattr(p, "model_number")))
-            star_ages.append(float(getattr(p, "star_age")))
-            dm = np.array(getattr(p, "dm"), dtype=float)
-            total_mass = np.sum(dm)
-        except Exception:
-            continue
-
-        for iso in valid_isos:
-            try:
-                iso_data = np.array(getattr(p, iso), dtype=float)
-                iso_avg[iso].append(np.sum(iso_data * dm) / total_mass)
-            except AttributeError:
-                iso_avg[iso].append(np.nan)
-
-    if not model_numbers:
-        return
-
+def _plot_abundance_evolution_from_data(
+    model_numbers, star_ages, iso_avgs, valid_isos, mass, name, phase, out_dir
+) -> None:
     model_numbers = np.array(model_numbers)
     star_ages = np.array(star_ages)
-    used_isos = [iso for iso in valid_isos if not all(np.isnan(v) for v in iso_avg[iso])]
+
     for iso in valid_isos:
-        iso_avg[iso] = np.array(iso_avg[iso])
+        iso_avgs[iso] = np.array(iso_avgs[iso])
+
+    used_isos = [iso for iso in valid_isos if not all(np.isnan(iso_avgs[iso]))]
 
     sort_idx = np.argsort(model_numbers)
     model_numbers = model_numbers[sort_idx]
     star_ages = star_ages[sort_idx]
     for iso in valid_isos:
-        iso_avg[iso] = iso_avg[iso][sort_idx]
+        iso_avgs[iso] = iso_avgs[iso][sort_idx]
 
     fig, ax = plt.subplots(figsize=(8, 6))
     for iso in used_isos:
         ax.plot(
             model_numbers,
-            iso_avg[iso],
+            iso_avgs[iso],
             label=ISO_LABELS.get(iso, iso),
             color=ISO_COLORS.get(iso, "#333333"),
             linewidth=1.2,
@@ -213,7 +205,6 @@ def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
     ax.set_xlabel("Model Number")
     _setup_ax(ax)
     _finalize_ax(ax)
-    # ax.set_title(f'{utils.parse_name_for_plots(name)} \u2014 Mass {mass} M\u2609')
 
     if len(model_numbers) > 1:
         sec_ax = ax.secondary_xaxis("top")
@@ -231,13 +222,44 @@ def _plot_abundance_evolution(mass: int, name: str, phase: str = ""):
     print(f"Saved: {out_dir}/Mass_{mass}_{name}_abundance_evolution.png")
 
 
-def plot(mass: int, name: str, phase: str = ""):
-    _plot_abundance_vs_logr(mass, name, phase=phase)
-    _plot_abundance_vs_logrho(mass, name, phase=phase)
-    _plot_abundance_evolution(mass, name, phase=phase)
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def load_last_profile(mass: int, name: str) -> "mr.MesaData | None":
+    """Load the last profile for a run exactly once."""
+    path = f"{mass}m-{name}/LOGS"
+    try:
+        num = utils.get_last_profile_num(path)
+        return mr.MesaData(f"{path}/profile{num}.data")
+    except Exception as e:
+        print(f"    material_composition: could not load last profile for {name}: {e}")
+        return None
 
 
-def plot_all(mass: int, names: list[str]):
+def plot_snapshots(prof, mass: int, name: str, phase: str = "") -> None:
+    """Render abundance-vs-logR and abundance-vs-logRho from a pre-loaded profile."""
+    out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m_material_composition{'_' + phase if phase else ''}"
+    os.makedirs(out_dir, exist_ok=True)
+    _plot_abundance_vs_logr(prof, mass, name, phase, out_dir)
+    _plot_abundance_vs_logrho(prof, mass, name, phase, out_dir)
+
+
+def plot(mass: int, name: str, phase: str = "") -> None:
+    """Standalone entry point — loads last profile once, streams all profiles once."""
+    from stream import stream_profiles
+
+    last_prof = load_last_profile(mass, name)
+    if last_prof is not None:
+        plot_snapshots(last_prof, mass, name, phase=phase)
+
+    evo_collector = CompositionEvolutionCollector()
+    path = f"{mass}m-{name}/LOGS"
+    stream_profiles(path, [evo_collector])
+    evo_collector.render(mass, name, phase=phase)
+
+
+def plot_all(mass: int, names: list[str]) -> None:
     for name in names:
         try:
             plot(mass, name)

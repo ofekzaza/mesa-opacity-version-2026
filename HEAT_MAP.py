@@ -10,6 +10,192 @@ import numpy as np
 import utils
 
 
+class HeatMapCollector:
+    """Streams through profiles once, collecting logRho + one-or-more value columns.
+
+    Only numpy arrays are held in memory — MesaData objects are discarded
+    by the caller (stream.stream_profiles) after each consume() call.
+    """
+
+    def __init__(self, value_axes: list[str], y_axis: str = "logRho"):
+        self.y_axis = y_axis
+        self.value_axes = list(value_axes)
+        self.model_numbers: list = []
+        self.star_ages: list = []
+        self.Y_all: list = []
+        self.VAL_all: dict[str, list] = {va: [] for va in value_axes}
+
+    def consume(self, prof) -> None:
+        if not hasattr(prof, self.y_axis):
+            return
+        self.model_numbers.append(getattr(prof, "model_number"))
+        self.star_ages.append(getattr(prof, "star_age"))
+        self.Y_all.append(np.array(getattr(prof, self.y_axis), dtype=float))
+        for va in self.value_axes:
+            if hasattr(prof, va):
+                self.VAL_all[va].append(np.array(getattr(prof, va), dtype=float))
+            else:
+                self.VAL_all[va].append(None)
+
+    def render_all(
+        self,
+        mass: int,
+        name: str,
+        normalize_map: "dict[str, bool] | None" = None,
+        y_units: str = "g/cm^3",
+        phase: str = "",
+    ) -> None:
+        if not self.model_numbers:
+            raise FileNotFoundError(f"No profiles collected for {mass}m-{name}")
+        if normalize_map is None:
+            normalize_map = {}
+        phase_suffix = f"_{phase}" if phase else ""
+        os.makedirs(f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}", exist_ok=True)
+        model_numbers = np.array(self.model_numbers)
+        star_ages = np.array(self.star_ages)
+        for va in self.value_axes:
+            _render_heatmap(
+                model_numbers=model_numbers,
+                star_ages=star_ages,
+                Y_all=self.Y_all,
+                VAL_list=self.VAL_all[va],
+                mass=mass,
+                name=name,
+                value_axis=va,
+                y_axis=self.y_axis,
+                y_units=y_units,
+                normalize=normalize_map.get(va, True),
+                phase=phase,
+            )
+
+
+def _render_heatmap(
+    model_numbers,
+    star_ages,
+    Y_all,
+    VAL_list,
+    mass,
+    name,
+    value_axis,
+    y_axis,
+    y_units,
+    normalize,
+    phase,
+):
+    """Pure rendering — no file I/O. All data already extracted from profiles."""
+    phase_suffix = f"_{phase}" if phase else ""
+
+    # Filter profiles where this value_axis was missing
+    valid_idx = [j for j, v in enumerate(VAL_list) if v is not None]
+    if not valid_idx:
+        print(f"    HEATMAP: no data for {value_axis} in {mass}m-{name}, skipping")
+        return
+
+    mn = model_numbers[valid_idx]
+    sa = star_ages[valid_idx]
+    Y = [Y_all[j] for j in valid_idx]
+    VAL = [VAL_list[j] for j in valid_idx]
+    n_v = len(valid_idx)
+
+    # Build common y-grid
+    min_y = min(np.min(arr) for arr in Y)
+    max_y = max(np.max(arr) for arr in Y)
+    n_points = max(len(arr) for arr in Y)
+    common_y = np.linspace(min_y, max_y, n_points)
+
+    # Build heatmap matrix via interpolation
+    DATA = np.full((n_points, n_v), np.nan)
+    for j in range(n_v):
+        y_data = Y[j]
+        val_data = VAL[j]
+        sort_idx = np.argsort(y_data)
+        DATA[:, j] = np.interp(
+            common_y, y_data[sort_idx], val_data[sort_idx], left=np.nan, right=np.nan
+        )
+
+    # Sort columns by model number
+    order = np.argsort(mn)
+    DATA = DATA[:, order]
+    mn = mn[order]
+    sa = sa[order]
+    Y_sorted = [Y[k] for k in order]
+
+    # Save raw matrix for debugging
+    with open("tmp.json", "w") as f:
+        json.dump(np.where(np.isnan(DATA), None, DATA).tolist(), f)
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    ax = plt.gca()
+    data_for_plot = DATA * 100
+
+    cmap = plt.get_cmap("viridis").copy()
+    cmap.set_bad(color=ax.get_facecolor())
+
+    if normalize:
+        min_val = math.floor(np.nanmin(data_for_plot))
+        norm = mcolors.PowerNorm(gamma=4.0, vmin=min_val, vmax=100)
+    else:
+        norm = None
+
+    plt.pcolormesh(mn, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest")
+
+    min_rhos = np.array([np.min(Y_sorted[k]) for k in range(n_v)])
+    max_rhos = np.array([np.max(Y_sorted[k]) for k in range(n_v)])
+    plt.plot(mn, min_rhos, color="red", linewidth=1.5, linestyle="--", label="Star Boundaries")
+    plt.plot(mn, max_rhos, color="red", linewidth=1.5, linestyle="--")
+    plt.legend(loc="upper right", framealpha=0.7)
+
+    cbar = plt.colorbar(label=utils.pretty_axis_name(value_axis) + " [%]")
+    if normalize:
+        norm_vals = np.linspace(0, 1, 6)
+        tick_vals = min_val + (100 - min_val) * (norm_vals ** (1 / 4.0))
+        tick_vals = np.unique(np.round(tick_vals).astype(int))
+        cbar.set_ticks(tick_vals)
+        cbar.set_ticklabels([str(t) for t in tick_vals])
+
+    xticks = ax.get_xticks()
+    xticks = [x for x in xticks if mn[0] <= x <= mn[-1]]
+    new_labels = []
+    for x in xticks:
+        age = np.interp(x, mn, sa)
+        new_labels.append(f"{int(x)}\n{age:.2e}")
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(new_labels)
+
+    plt.xlabel("Model Number\n(Star Age [years])")
+    plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
+    plt.tight_layout()
+    out_path = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}.png"
+    plt.savefig(out_path, dpi=300)
+    plt.close()
+    print(f"    Saved: {out_path}")
+
+
+def plot_batch(
+    mass: int,
+    name: str,
+    value_axes: list[str],
+    normalize_map: "dict[str, bool] | None" = None,
+    y_axis: str = "logRho",
+    y_units: str = "g/cm^3",
+    phase: str = "",
+):
+    """Stream profiles once, render one heatmap per value_axis.
+
+    This is the preferred entry point when calling from main.py.
+    """
+    from stream import stream_profiles
+
+    logs_path = f"{mass}m-{name}/LOGS"
+    print(f"    HEATMAP: streaming {logs_path} for {value_axes}...")
+    collector = HeatMapCollector(value_axes=value_axes, y_axis=y_axis)
+    count = stream_profiles(logs_path, [collector])
+    if count == 0:
+        raise FileNotFoundError(f"No profiles found for {mass}m-{name}")
+    collector.render_all(mass, name, normalize_map=normalize_map, y_units=y_units, phase=phase)
+
+
 def plot(
     mass: int,
     name: str,
@@ -20,160 +206,16 @@ def plot(
     normalize: bool = True,
     phase: str = "",
 ):
-    """
-    model_var: the field holding model number (always 'model_number')
-    y_axis: the vertical axis variable (e.g. 'logRho')
-    value_axis: the heatmap color variable (e.g. 'extra_opacity_factor')
-    """
-
-    path = f"{mass}m-{name}/LOGS"
-    phase_suffix = f"_{phase}" if phase else ""
-
-    print(f"Reading profiles from: {path}")
-
-    profiles = []
-
-    # Read all profiles and collect model numbers
-    model_numbers = []
-    star_ages = []
-    Y_all = []
-    VAL_all = []
-
-    for i in range(1, 9999):
-        f_path = f"{path}/profile{i}.data"
-        if not os.path.exists(f_path):
-            break
-
-        prof = mr.MesaData(f_path)
-
-        # Ensure required fields exist
-        if not hasattr(prof, y_axis):
-            print(f"Profile {i} missing required fields, skipping. {y_axis}")
-            continue
-        if not hasattr(prof, value_axis):
-            print(f"Profile {i} missing required fields, skipping. {value_axis}")
-            continue
-
-        profiles.append(f_path)
-        model_numbers.append(getattr(prof, "model_number"))
-        star_ages.append(getattr(prof, "star_age"))
-
-        Y_all.append(np.array(getattr(prof, y_axis), dtype=float))
-        VAL_all.append(np.array(getattr(prof, value_axis), dtype=float))
-
-    if not profiles:
-        raise FileNotFoundError(f"No profiles found. for {mass}m-{name}")
-
-    # Build common y-grid (vertical axis)
-    min_y = min(np.min(arr) for arr in Y_all)
-    max_y = max(np.max(arr) for arr in Y_all)
-    n_points = max(len(arr) for arr in Y_all)
-
-    common_y = np.linspace(min_y, max_y, n_points)
-
-    # Heatmap matrix
-    n_models = len(model_numbers)
-    DATA = np.zeros((n_points, n_models))
-
-    # Fill the heatmap interpolating each profile
-    for j in range(n_models):
-        y_data = Y_all[j]
-        val_data = VAL_all[j]
-
-        # Interpolate to common y grid
-        # Sort y_data to ensure it is increasing for np.interp
-        sort_idx = np.argsort(y_data)
-        interp_val = np.interp(
-            common_y, y_data[sort_idx], val_data[sort_idx], left=np.nan, right=np.nan
-        )
-        DATA[:, j] = interp_val
-
-    # Save raw matrix for debugging
-    with open("tmp.json", "w") as f:
-        # replace np.nan with None for valid JSON
-        json.dump(np.where(np.isnan(DATA), None, DATA).tolist(), f)
-
-    # Sort by model number (important!)
-    model_numbers = np.array(model_numbers)
-    star_ages = np.array(star_ages)
-    sort_idx = np.argsort(model_numbers)
-
-    DATA = DATA[:, sort_idx]
-    model_numbers = model_numbers[sort_idx]
-    star_ages = star_ages[sort_idx]
-
-    # Plot heatmap
-    plt.figure(figsize=(10, 6))
-    ax = plt.gca()
-    data_for_plot = DATA * 100
-
-    cmap = plt.get_cmap("viridis").copy()
-    cmap.set_bad(color=ax.get_facecolor())
-
-    # Use PowerNorm to expand the contrast near the maximum values (gamma > 1)
-    # This prevents the bulk of data near 100 from looking identical, making tiny drops obvious!
-    if normalize:
-        min_val = math.floor(np.nanmin(data_for_plot))
-        norm = mcolors.PowerNorm(gamma=4.0, vmin=min_val, vmax=100)
-    else:
-        norm = None
-
-    # Use pcolormesh to map non-linear model_numbers accurately
-    plt.pcolormesh(
-        model_numbers, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest"
+    """Backward-compatible wrapper — delegates to plot_batch."""
+    plot_batch(
+        mass,
+        name,
+        value_axes=[value_axis],
+        normalize_map={value_axis: normalize},
+        y_axis=y_axis,
+        y_units=y_units,
+        phase=phase,
     )
-
-    # Add boundary lines for min and max logRho of the star
-    min_rhos = np.array([np.min(Y_all[k]) for k in range(n_models)])[sort_idx]
-    max_rhos = np.array([np.max(Y_all[k]) for k in range(n_models)])[sort_idx]
-    plt.plot(
-        model_numbers,
-        min_rhos,
-        color="red",
-        linewidth=1.5,
-        linestyle="--",
-        label="Star Boundaries",
-    )
-    plt.plot(model_numbers, max_rhos, color="red", linewidth=1.5, linestyle="--")
-    plt.legend(loc="upper right", framealpha=0.7)
-
-    cbar = plt.colorbar(label=utils.pretty_axis_name(value_axis) + " [%]")
-    # Manually configure visually evenly-spaced ticks to prevent overlapping labels at the bottom due to PowerNorm
-    if normalize:
-        norm_vals = np.linspace(0, 1, 6)
-        tick_vals = min_val + (100 - min_val) * (norm_vals ** (1 / 4.0))
-        tick_vals = np.unique(np.round(tick_vals).astype(int))
-        cbar.set_ticks(tick_vals)
-        cbar.set_ticklabels([str(t) for t in tick_vals])
-
-    # Update x-axis labels to include star_age
-    ax = plt.gca()
-    # Get current ticks (auto-selected by matplotlib based on extent)
-    # We force a draw to make sure ticks are populated, though usually get_xticks works if we use the current axes
-    xticks = ax.get_xticks()
-
-    # Filter xticks to those within valid range
-    xticks = [x for x in xticks if model_numbers[0] <= x <= model_numbers[-1]]
-
-    new_labels = []
-    for x in xticks:
-        # Interpolate to find age for this model number
-        # We can use np.interp because model_numbers are sorted
-        age = np.interp(x, model_numbers, star_ages)
-        new_labels.append(f"{int(x)}\n{age:.2e}")
-
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(new_labels)
-
-    plt.xlabel("Model Number\n(Star Age [years])")
-    plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
-    # plt.title(f"{value_axis} vs {y_axis} across Model Number")
-
-    plt.tight_layout()
-    plt.savefig(
-        f"plot{mass}m{phase_suffix}/HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}.png", dpi=300
-    )
-    plt.close()
 
 
 def plot_heat_map(
@@ -183,28 +225,17 @@ def plot_heat_map(
     normalize: bool = True,
     phase: str = "",
 ):
-    plot(
-        mass=mass,
-        name=name,
-        model_var="model_number",
-        y_axis="logRho",
-        y_units="g/cm^3",
-        value_axis=value_axis,
-        normalize=normalize,
+    """Standalone convenience wrapper (single value_axis)."""
+    plot_batch(
+        mass,
+        name,
+        value_axes=[value_axis],
+        normalize_map={value_axis: normalize},
         phase=phase,
     )
 
 
 if __name__ == "__main__":
-    # for mass in [60]:
-    #     plot(
-    #         mass=mass,
-    #         name = "ours_reduction",
-    #         model_var="model_number",
-    #         y_axis="logRho",
-    #         y_units="g/cm^3",
-    #         value_axis="extra_opacity_factor",
-    #     )
     for mass in [80]:
         plot(
             mass=mass,
@@ -212,6 +243,6 @@ if __name__ == "__main__":
             model_var="model_number",
             y_axis="logRho",
             y_units="g/cm^3",
-            value_axis="extra_opacity_factor",  # "L_div_Ledd_effective",
+            value_axis="extra_opacity_factor",
             normalize=False,
         )

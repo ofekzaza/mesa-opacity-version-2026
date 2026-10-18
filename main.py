@@ -5,6 +5,7 @@ import generic_last_log_plot
 import HEAT_MAP
 import hr_diagram_script
 import material_composition_plot
+from stream import stream_profiles
 
 
 def _get_phase(name: str) -> str:
@@ -16,11 +17,7 @@ def _get_phase(name: str) -> str:
 
 
 def _group_names(names: list[str]) -> list[tuple[str, str]]:
-    groups: list[tuple[str, str]] = []
-    for name in names:
-        phase = _get_phase(name)
-        groups.append((name, phase))
-    return groups
+    return [(name, _get_phase(name)) for name in names]
 
 
 folders_for_graphs = {
@@ -105,23 +102,37 @@ for mass, names in folders_for_graphs.items():
     for name, phase in grouped:
         by_phase.setdefault(phase, []).append(name)
 
-    # Comparison plots: all names per phase together
+    # ------------------------------------------------------------------
+    # Comparison plots — one last-profile read per name, shared across
+    # all generic_last_log_plot / hr_diagram / evolution_graph calls
+    # ------------------------------------------------------------------
     for phase, phase_names in by_phase.items():
         if not phase:
             continue
         print(f"  comparison plots for phase={phase}: {phase_names}")
 
+        # Load last profiles once; reuse across all 13 plot() calls below
+        preloaded = generic_last_log_plot.load_last_profiles(mass, phase_names)
+
         try:
-            generic_last_log_plot.plot(mass, phase_names, x_axis="R", x_units="", phase=phase, y_axis="logRho", y_units="g/cm³")
+            generic_last_log_plot.plot(
+                mass, phase_names,
+                x_axis="R", x_units="", phase=phase,
+                y_axis="logRho", y_units="g/cm³",
+                _preloaded=preloaded,
+            )
             generic_last_log_plot.plot_generic_last_log_plot(
-                mass, phase_names, phase=phase
+                mass, phase_names, phase=phase, _preloaded=preloaded
             )
         except Exception as e:
             print(f"    generic_last_log_plot failed: {e}")
 
         try:
             generic_last_log_plot.plot_generic_last_log_plot(
-                mass, phase_names, x_axis="logR", x_units="", phase=phase, inverse_x=True
+                mass, phase_names,
+                x_axis="logR", x_units="", phase=phase,
+                inverse_x=True,
+                _preloaded=preloaded,
             )
         except Exception as e:
             print(f"    generic_last_log_plot(logR) failed: {e}")
@@ -136,29 +147,56 @@ for mass, names in folders_for_graphs.items():
         except Exception as e:
             print(f"    evolution_graph failed: {e}")
 
+    # ------------------------------------------------------------------
     # Individual per-folder plots
+    # One streaming pass per name feeds both HeatMapCollector and
+    # CompositionEvolutionCollector — profiles are read exactly once.
+    # ------------------------------------------------------------------
     for name, phase in grouped:
         print(f"  individual plots for {name} (phase={phase or 'none'})...")
 
-        material_composition_plot.plot(mass, name, phase=phase)
+        logs_path = f"{mass}m-{name}/LOGS"
+        phase_suffix = f"_{phase}" if phase else ""
 
+        # Determine which heatmap value_axes are needed
         if "ours" in name:
-            try:
-                HEAT_MAP.plot_heat_map(mass, name, phase=phase)
-                HEAT_MAP.plot_heat_map(mass, name, phase=phase, value_axis="logT", normalize=False)
-            except Exception as e:
-                print(f"    HEAT_MAP({name}) failed: {e}")
+            hm_value_axes = ["extra_opacity_factor", "logT", "L_div_Ledd_effective"]
+            hm_normalize_map = {
+                "extra_opacity_factor": True,
+                "logT": False,
+                "L_div_Ledd_effective": False,
+            }
+        else:
+            hm_value_axes = ["L_div_Ledd_effective"]
+            hm_normalize_map = {"L_div_Ledd_effective": False}
 
+        # Set up streaming collectors
+        hm_collector = HEAT_MAP.HeatMapCollector(value_axes=hm_value_axes)
+        evo_collector = material_composition_plot.CompositionEvolutionCollector()
+
+        # Single pass through all profiles — both collectors consume each profile
+        print(f"    streaming {logs_path}...")
+        stream_profiles(logs_path, [hm_collector, evo_collector])
+
+        # Load last profile once for snapshot plots
+        last_prof = material_composition_plot.load_last_profile(mass, name)
+        if last_prof is not None:
+            material_composition_plot.plot_snapshots(last_prof, mass, name, phase=phase)
+
+        # Render composition evolution from collected scalars
         try:
-            HEAT_MAP.plot_heat_map(
-                mass,
-                name,
-                value_axis="L_div_Ledd_effective",
-                normalize=False,
+            evo_collector.render(mass, name, phase=phase)
+        except Exception as e:
+            print(f"    composition evolution({name}) failed: {e}")
+
+        # Render heatmaps from collected arrays
+        try:
+            hm_collector.render_all(
+                mass, name,
+                normalize_map=hm_normalize_map,
                 phase=phase,
             )
         except Exception as e:
-            print(f"    HEAT_MAP({name}, L_div_Ledd) failed: {e}")
-
+            print(f"    HEAT_MAP({name}) failed: {e}")
 
     print("\n")

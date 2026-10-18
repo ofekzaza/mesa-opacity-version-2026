@@ -3,6 +3,8 @@ import os
 import matplotlib.pyplot as plt
 import mesa_reader as mr
 
+import utils
+
 # List of history file names (without extensions)
 NAMES = [
     # "normal",
@@ -64,8 +66,8 @@ def plot_hr_diagram(mass: int, names: list[str], phase: str = ""):
     plt.tight_layout()
 
     # Save the plot
-    os.makedirs(f"plot{mass}m{phase_suffix}", exist_ok=True)
-    plt.savefig(f"plot{mass}m{phase_suffix}/mass_{mass}_hr_diagram_comparison.png", dpi=300)
+    os.makedirs(f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}", exist_ok=True)
+    plt.savefig(f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/mass_{mass}_hr_diagram_comparison.png", dpi=300)
     plt.close()
 
 

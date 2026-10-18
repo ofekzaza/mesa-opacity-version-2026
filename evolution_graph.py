@@ -352,7 +352,7 @@ def plot(mass: int, names: list[str], y_axis: str, phase: str = ""):
     plt.legend()
     plt.tight_layout()
 
-    out_dir = f"plot{mass}m{phase_suffix}"
+    out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}"
     os.makedirs(out_dir, exist_ok=True)
     plt.savefig(f"{out_dir}/Mass_{mass}_{y_axis}_vs_time.png", dpi=300)
     plt.close()

@@ -1,4 +1,6 @@
 OURS_NAME = "Porosity Reduction"
+
+PLOTS_ROOT = "plotted_results"
 SUPEREDUCTION_NAME = "Super Reduction"
 
 
@@ -45,6 +47,22 @@ pretty_axises = {
 
 def pretty_axis_name(axis: str) -> str:
     return pretty_axises.get(axis, axis)
+
+
+def get_last_profile_num(logs_path: str) -> int:
+    """Return the last profile number in a LOGS directory."""
+    import glob as _glob
+    import mesa_reader as _mr
+    try:
+        return _mr.MesaLogDir(logs_path).profile_numbers[-1]
+    except Exception:
+        prof_files = sorted(
+            _glob.glob(f"{logs_path}/profile*.data"),
+            key=lambda x: int(x.split("profile")[-1].split(".data")[0]),
+        )
+        if not prof_files:
+            raise FileNotFoundError(f"No profiles found in {logs_path}")
+        return int(prof_files[-1].split("profile")[-1].split(".data")[0])
 
 
 def get_line_kwargs(name: str, base_colors: dict) -> tuple[dict, bool, str]:
