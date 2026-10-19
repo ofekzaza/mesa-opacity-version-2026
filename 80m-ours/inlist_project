@@ -46,6 +46,7 @@
     max_num_profile_models = 9999
     history_interval = 50
     profile_interval = 50
+    photo_interval = 1000
 
    ! starting specifications
    initial_mass = 80 ! in Msun units
