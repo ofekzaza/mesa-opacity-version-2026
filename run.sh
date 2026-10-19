@@ -2,7 +2,7 @@
 
 LOG_FILE="$(pwd)/run_log.txt"
 
-export OMP_NUM_THREADS=16
+#export OMP_NUM_THREADS=16 # didnt worked
 
 echo "Starting run at $(date)" >> "$LOG_FILE"
 
@@ -59,6 +59,11 @@ for dir in "${DIRS[@]}"; do
         echo "Entering $dir" >> "$LOG_FILE"
         cd "$dir" || continue
 
+        rm -rf photos/*
+        rm -f restart_photo
+        echo "Cleared photos in $dir" >> "$LOG_FILE"
+
+
         CMD="./mk"
         START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
         START_EPOCH=$(date +%s)
@@ -71,8 +76,8 @@ for dir in "${DIRS[@]}"; do
         TOTAL_TIME=$(printf "%02d:%02d:%02d" $((TOTAL_SEC/3600)) $((TOTAL_SEC%3600/60)) $((TOTAL_SEC%60)))
         echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, TotalTime: $TOTAL_TIME, ExitCode: $MK_EXIT_CODE" >> "$LOG_FILE"
 
-        if [ $MK_EXIT_CODE -eq 0 ]; then
-            CMD="./rn"
+        if [ $MK_EXIT_CODE -eq 0 ]; then            
+            CMD="../watchdog.sh"
             START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
             START_EPOCH=$(date +%s)
             echo "Running $CMD..." >> "$LOG_FILE"
@@ -83,13 +88,13 @@ for dir in "${DIRS[@]}"; do
             END_TIME=$(date "+%Y-%m-%d %H:%M:%S")
             TOTAL_SEC=$((END_EPOCH - START_EPOCH))
             TOTAL_TIME=$(printf "%02d:%02d:%02d" $((TOTAL_SEC/3600)) $((TOTAL_SEC%3600/60)) $((TOTAL_SEC%60)))
-            TERM_CODE=$(grep -o 'termination code:.*' "$TMP_FILE" | tail -1 | sed 's/termination code: *//')
+            TERM_CODE=$(grep -o 'termination code:.*' "watchdog.log" 2>/dev/null | tail -1 | sed 's/termination code: *//')
             rm -f "$TMP_FILE"
             echo "Folder: $dir, Command: $CMD, Start: $START_TIME, End: $END_TIME, TotalTime: $TOTAL_TIME, ExitCode: $RN_EXIT_CODE, TermCode: $TERM_CODE" >> "$LOG_FILE"
             [ $TOTAL_SEC -lt 1200 ] && echo "===WARNING===" >> "$LOG_FILE"
         else
-            echo "Skipping ./rn because ./mk failed in $dir" >> "$LOG_FILE"
-            echo "Folder: $dir, Command: ./rn, Start: -, End: -, Status: SKIPPED (mk failed)" >> "$LOG_FILE"
+            echo "Skipping ../watchdog.sh because ./mk failed in $dir" >> "$LOG_FILE"
+            echo "Folder: $dir, Command: ../watchdog.sh, Start: -, End: -, Status: SKIPPED (mk failed)" >> "$LOG_FILE"
         fi
 
         cd ..
