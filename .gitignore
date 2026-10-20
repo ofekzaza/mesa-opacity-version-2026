@@ -16,3 +16,4 @@ star
 **/make/run.o
 **/make/run_star.mod
 LOGS/
+watchdog.log
