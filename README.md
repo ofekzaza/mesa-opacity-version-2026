@@ -78,3 +78,15 @@ Then copy the `other_opacity_factor` subroutine and the `extra_opacity_factor_me
 ### Data
 
 If you also want the extra columns that we added, you need to declare them in the history and profile output functions — see the `run_star_extras.f90` file for an example.
+
+# issues
+
+## mac
+
+most of the runs were done on mac.
+
+1. we add issue with mac with null type of numbers (doubles i think), we add to add some env vars to change the way fortran looks at numbers in mac.
+
+export FFLAGS="-O2 -fno-range-check -fopenmp"
+
+2. long executions - after 4 days of running the same model we used to get deadlock, this is why we created the watchdog, should not happen on linux but it is statistics. some bug in openmp lib i think.
