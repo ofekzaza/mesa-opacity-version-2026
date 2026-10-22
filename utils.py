@@ -33,6 +33,7 @@ pretty_axises = {
     "log_opacity": r"$\log(\kappa)$",
     "extra_opacity_factor": "extra opacity factor",
     "logT": r"$\log(T)$ [K]",
+    "temperature": r"$T$ [K]",
     "entropy": r"$S$",
     "mass": r"$M/M_{\odot}$",
     "logR": r"$\log(R/R_{\odot})$",

@@ -113,21 +113,73 @@ def _render_heatmap(
             common_y, y_data[sort_idx], val_data[sort_idx], left=np.nan, right=np.nan
         )
 
-    # Sort columns by model number
-    order = np.argsort(mn)
-    DATA = DATA[:, order]
-    mn = mn[order]
-    sa = sa[order]
-    Y_sorted = [Y[k] for k in order]
-
     # Save raw matrix for debugging
     with open("tmp.json", "w") as f:
         json.dump(np.where(np.isnan(DATA), None, DATA).tolist(), f)
 
+    for x_axis in ("model_number", "star_age"):
+        _draw_heatmap(
+            mn=mn,
+            sa=sa,
+            Y=Y,
+            DATA=DATA,
+            common_y=common_y,
+            mass=mass,
+            name=name,
+            value_axis=value_axis,
+            y_axis=y_axis,
+            y_units=y_units,
+            normalize=normalize,
+            phase_suffix=phase_suffix,
+            x_axis=x_axis,
+        )
+
+
+def _draw_heatmap(
+    mn,
+    sa,
+    Y,
+    DATA,
+    common_y,
+    mass,
+    name,
+    value_axis,
+    y_axis,
+    y_units,
+    normalize,
+    phase_suffix,
+    x_axis,
+):
+    """Render one heatmap image with either model number or star age on the x axis."""
+    n_v = DATA.shape[1]
+
+    # Sort columns by the chosen x axis
+    if x_axis == "star_age":
+        order = np.argsort(sa)
+        x = sa[order]
+        secondary = mn[order]
+        x_label = "Star Age [years]\n(Model Number)"
+        file_suffix = "_xstar_age"
+    else:
+        order = np.argsort(mn)
+        x = mn[order]
+        secondary = sa[order]
+        x_label = "Model Number\n(Star Age [years])"
+        file_suffix = ""
+
+    DATA = DATA[:, order]
+    Y_sorted = [Y[k] for k in order]
+
     # Plot
     plt.figure(figsize=(10, 6))
     ax = plt.gca()
-    data_for_plot = DATA * 100
+
+    if value_axis == "extra_opacity_factor":
+        data_for_plot = DATA * 100
+        cbar_label = utils.pretty_axis_name(value_axis) + " [%]"
+    else:
+        data_for_plot = DATA
+        cbar_label = utils.pretty_axis_name(value_axis)
 
     cmap = plt.get_cmap("viridis").copy()
     cmap.set_bad(color=ax.get_facecolor())
@@ -138,15 +190,23 @@ def _render_heatmap(
     else:
         norm = None
 
-    plt.pcolormesh(mn, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest")
+    if x_axis == "star_age":
+        # x_plot = np.log10(x)
+        secondary_plot = secondary
+        x_plot_axis = x # x_plot
+    else:
+        x_plot_axis = x
+        secondary_plot = secondary
+
+    plt.pcolormesh(x_plot_axis, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest")
 
     min_rhos = np.array([np.min(Y_sorted[k]) for k in range(n_v)])
     max_rhos = np.array([np.max(Y_sorted[k]) for k in range(n_v)])
-    plt.plot(mn, min_rhos, color="red", linewidth=1.5, linestyle="--", label="Star Boundaries")
-    plt.plot(mn, max_rhos, color="red", linewidth=1.5, linestyle="--")
+    plt.plot(x_plot_axis, min_rhos, color="red", linewidth=1.5, linestyle="--", label="Star Boundaries")
+    plt.plot(x_plot_axis, max_rhos, color="red", linewidth=1.5, linestyle="--")
     plt.legend(loc="upper right", framealpha=0.7)
 
-    cbar = plt.colorbar(label=utils.pretty_axis_name(value_axis) + " [%]")
+    cbar = plt.colorbar(label=cbar_label)
     if normalize:
         norm_vals = np.linspace(0, 1, 6)
         tick_vals = min_val + (100 - min_val) * (norm_vals ** (1 / 4.0))
@@ -155,18 +215,26 @@ def _render_heatmap(
         cbar.set_ticklabels([str(t) for t in tick_vals])
 
     xticks = ax.get_xticks()
-    xticks = [x for x in xticks if mn[0] <= x <= mn[-1]]
-    new_labels = []
-    for x in xticks:
-        age = np.interp(x, mn, sa)
-        new_labels.append(f"{int(x)}\n{age:.2e}")
+    if x_axis == "star_age":
+        xticks = [t for t in xticks if x_plot_axis[0] <= t <= x_plot_axis[-1]]
+        new_labels = []
+        for t in xticks:
+            age = 10**t
+            mn_interp = np.interp(age, x, secondary_plot)
+            new_labels.append(f"{t:.2f}\n{int(round(mn_interp))}")
+    else:
+        xticks = [t for t in xticks if x_plot_axis[0] <= t <= x_plot_axis[-1]]
+        new_labels = [f"{int(t)}\n{np.interp(t, x_plot_axis, secondary_plot):.2e}" for t in xticks]
     ax.set_xticks(xticks)
     ax.set_xticklabels(new_labels)
 
-    plt.xlabel("Model Number\n(Star Age [years])")
+    plt.xlabel(x_label)
     plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
     plt.tight_layout()
-    out_path = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}.png"
+    out_path = (
+        f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/"
+        f"HEATMAP_{mass}_{name}_{value_axis}_vs_{y_axis}{file_suffix}.png"
+    )
     plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"    Saved: {out_path}")
