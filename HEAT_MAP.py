@@ -202,6 +202,7 @@ def _draw_heatmap(
 
     if x_axis == "star_age":
         ax.invert_xaxis()
+        ax.set_xscale("log")
 
     plt.pcolormesh(x_plot_axis, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest")
 
