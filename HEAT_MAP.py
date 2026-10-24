@@ -161,6 +161,9 @@ def _draw_heatmap(
         t_end = x[-1]
         x = t_end - x
         x = np.maximum(x, 0.0)
+        # x is descending here (oldest -> newest); np.interp needs ascending
+        interp_x = x[::-1]
+        interp_secondary = secondary[::-1]
         x_label = "Star Time To Live [years]\n(Model Number)"
         file_suffix = "_xstar_age"
     else:
@@ -225,7 +228,7 @@ def _draw_heatmap(
         xticks = [t for t in xticks if x_plot_axis.min() <= t <= x_plot_axis.max()]
         new_labels = []
         for t in xticks:
-            mn_interp = np.interp(t, x, secondary_plot)
+            mn_interp = np.interp(t, interp_x, interp_secondary)
             new_labels.append(f"{t:.2e}\n{int(round(mn_interp))}")
     else:
         xticks = [t for t in xticks if x_plot_axis.min() <= t <= x_plot_axis.max()]
