@@ -158,7 +158,10 @@ def _draw_heatmap(
         order = np.argsort(sa)
         x = sa[order]
         secondary = mn[order]
-        x_label = "Star Age [years]\n(Model Number)"
+        t_end = x[-1]
+        x = t_end - x
+        x = np.maximum(x, 0.0)
+        x_label = "Star Time To Live [years]\n(Model Number)"
         file_suffix = "_xstar_age"
     else:
         order = np.argsort(mn)
@@ -191,12 +194,14 @@ def _draw_heatmap(
         norm = None
 
     if x_axis == "star_age":
-        # x_plot = np.log10(x)
         secondary_plot = secondary
-        x_plot_axis = x # x_plot
+        x_plot_axis = x
     else:
         x_plot_axis = x
         secondary_plot = secondary
+
+    if x_axis == "star_age":
+        ax.invert_xaxis()
 
     plt.pcolormesh(x_plot_axis, common_y, data_for_plot, cmap=cmap, norm=norm, shading="nearest")
 
@@ -216,19 +221,19 @@ def _draw_heatmap(
 
     xticks = ax.get_xticks()
     if x_axis == "star_age":
-        xticks = [t for t in xticks if x_plot_axis[0] <= t <= x_plot_axis[-1]]
+        xticks = [t for t in xticks if x_plot_axis.min() <= t <= x_plot_axis.max()]
         new_labels = []
         for t in xticks:
-            age = 10**t
-            mn_interp = np.interp(age, x, secondary_plot)
-            new_labels.append(f"{t:.2f}\n{int(round(mn_interp))}")
+            mn_interp = np.interp(t, x, secondary_plot)
+            new_labels.append(f"{t:.2e}\n{int(round(mn_interp))}")
     else:
-        xticks = [t for t in xticks if x_plot_axis[0] <= t <= x_plot_axis[-1]]
+        xticks = [t for t in xticks if x_plot_axis.min() <= t <= x_plot_axis.max()]
         new_labels = [f"{int(t)}\n{np.interp(t, x_plot_axis, secondary_plot):.2e}" for t in xticks]
     ax.set_xticks(xticks)
     ax.set_xticklabels(new_labels)
 
     plt.xlabel(x_label)
+
     plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
     plt.tight_layout()
     out_path = (
