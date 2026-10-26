@@ -3,8 +3,29 @@ import os
 
 import matplotlib.pyplot as plt
 import mesa_reader as mr
+import numpy as np
 
 import utils
+
+def _convective_mask(prof):
+    """True for zones where convection is active (conv_vel > 0)."""
+    if not hasattr(prof, "conv_vel"):
+        return None
+    return np.array(prof.conv_vel, dtype=float) > 0.0
+
+
+def _plot_convective_segments(x, y, mask, color):
+    """Overlay contiguous convective blocks along an existing profile curve."""
+    if mask is None:
+        return False
+    diff = np.diff(np.concatenate(([False], mask, [False])).astype(int))
+    starts = np.where(diff == 1)[0]
+    ends = np.where(diff == -1)[0]
+    for s, e in zip(starts, ends):
+        s0 = max(0, s - 1)
+        e0 = min(len(x), e + 1)
+        plt.plot(x[s0:e0], y[s0:e0], color=color, linewidth=3.2, alpha=0.85, zorder=5)
+    return len(starts) > 0
 
 y_axises = [
     "L_div_Ledd_effective",
@@ -55,6 +76,7 @@ def plot(
     plt.figure()
     phase_suffix = f"_{phase}" if phase else ""
     base_colors: dict[str, str] = {}
+    conv_plotted = False
 
     # Load profiles if not pre-supplied
     profiles = _preloaded if _preloaded is not None else load_last_profiles(mass, names)
@@ -81,6 +103,12 @@ def plot(
             base_colors[base_name] = color
         plt.plot(x_data[-1], y_data[-1], "o", markersize=6, color=color)
         plt.plot(x_data[0], y_data[0], "o", markersize=6, color=color)
+
+        if _plot_convective_segments(x_data, y_data, _convective_mask(prof), color):
+            conv_plotted = True
+
+    if conv_plotted:
+        plt.plot([], [], color="0.25", linewidth=3.2, label="Convection (thick line, conv_vel > 0)")
 
     x_units_str = fr" [{x_units}]" if x_units else ""
     y_units_str = fr" [{y_units}]" if y_units else ""
