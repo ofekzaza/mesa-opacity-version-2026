@@ -3,6 +3,7 @@ import os
 
 import matplotlib.pyplot as plt
 import mesa_reader as mr
+import numpy as np
 
 import utils
 
@@ -357,3 +358,81 @@ def plot(mass: int, names: list[str], y_axis: str, phase: str = ""):
     plt.savefig(f"{out_dir}/Mass_{mass}_{y_axis}_vs_time.png", dpi=300)
     plt.close()
     print(f"    Saved: {out_dir}/Mass_{mass}_{y_axis}_vs_time.png")
+
+
+def plot_percentages(mass: int, names: list[str], phase: str = ""):
+    """Plot core hydrogen and stellar mass percentages vs star age.
+
+    Only the ``ours`` run is used. Core hydrogen (center_h1) is shown as
+    a percentage of the mass fraction; mass is shown as a percentage of
+    its initial value. The initial mass is written on the plot.
+    """
+    phase_suffix = f"_{phase}" if phase else ""
+    plt.figure()
+    any_plotted = False
+    mass_initial = None
+
+    for name in names:
+        if "ours" not in name:
+            continue
+        try:
+            history = mr.MesaData(f"{mass}m-{name}/LOGS/history.data")
+        except Exception as e:
+            print(f"    percentages({name}): could not read history: {e}")
+            continue
+        if not (
+            hasattr(history, "star_age")
+            and hasattr(history, "star_mass")
+            and hasattr(history, "center_h1")
+        ):
+            print(f"    percentages({name}): missing history columns")
+            continue
+
+        age = np.array(history.star_age, dtype=float)
+        mass_star = np.array(history.star_mass, dtype=float)
+        h_core = np.array(history.center_h1, dtype=float)
+
+        order = np.argsort(age)
+        age = age[order]
+        mass_star = mass_star[order]
+        h_core = h_core[order]
+
+        mass_initial = mass_star[0]
+        if not np.isfinite(mass_initial) or mass_initial == 0:
+            print(f"    percentages({name}): invalid initial mass")
+            continue
+
+        plt.plot(
+            age, 100.0 * mass_star / mass_initial, color="C0", linestyle="-",
+            linewidth=1.6, label="Mass (% of $M_{\\rm init}$)",
+        )
+        plt.plot(
+            age, 100.0 * h_core, color="C1", linestyle="--",
+            linewidth=1.6, label="H in core (%)",
+        )
+        any_plotted = True
+        break
+
+    if not any_plotted:
+        plt.close()
+        print("    percentages: nothing to plot")
+        return
+
+    plt.xlabel("Star Age [yr]")
+    plt.ylabel("Percentage")
+    plt.ylim(0, 105)
+    plt.grid(True)
+    plt.legend(fontsize=9)
+    plt.text(
+        0.02, 0.95, f"$M_{{\\rm init}}={mass_initial:.4g}\\,M_\\odot$",
+        transform=plt.gca().transAxes, va="top", fontsize=10,
+        bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none"},
+    )
+    plt.tight_layout()
+
+    out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}"
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = f"{out_dir}/Mass_{mass}_H_and_mass_percent_vs_time.png"
+    plt.savefig(out_path, dpi=300)
+    plt.close()
+    print(f"    Saved: {out_path}")
