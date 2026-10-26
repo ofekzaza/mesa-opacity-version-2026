@@ -67,7 +67,7 @@ for dir in "${DIRS[@]}"; do
         CMD="./mk"
         START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
         START_EPOCH=$(date +%s)
-        echo "Running $CMD..." >> "$LOG_FILE"
+        echo "Running $dir $CMD..." >> "$LOG_FILE"
         $CMD
         MK_EXIT_CODE=$?
         END_EPOCH=$(date +%s)
@@ -80,7 +80,7 @@ for dir in "${DIRS[@]}"; do
             CMD="../watchdog.sh"
             START_TIME=$(date "+%Y-%m-%d %H:%M:%S")
             START_EPOCH=$(date +%s)
-            echo "Running $CMD..." >> "$LOG_FILE"
+            echo "Running $dir $CMD..." >> "$LOG_FILE"
             TMP_FILE=$(mktemp)
             $CMD 2>&1 | tee "$TMP_FILE"
             RN_EXIT_CODE=${PIPESTATUS[0]}
