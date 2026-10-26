@@ -73,7 +73,7 @@
            do i = 1, s%nz
                opacity_target = 1
                if (s% opacity(i) > 0.0d0) then
-                  ratio = s% gradT(i) * 4.0d0 * (s % T(i) ** 4) * a / (3 * s% Peos(i) * extra_opacity_factor_memory_target(i)) ;
+                  ratio = abs(s% gradT(i)) * 4.0d0 * (s % T(i) ** 4) * a / (3 * s% Peos(i) * extra_opacity_factor_memory_target(i)) ;
                   if ( ratio > threshold) then
                      opacity_target = 1 / (1 + ratio - threshold)
                   end if
