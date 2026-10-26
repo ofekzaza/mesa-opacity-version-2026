@@ -85,6 +85,13 @@ def _render_heatmap(
     """Pure rendering — no file I/O. All data already extracted from profiles."""
     phase_suffix = f"_{phase}" if phase else ""
 
+    # For the logT heatmap, swap the axes: logT becomes Y, logRho the colour.
+    if value_axis == "logT":
+        Y_all, VAL_list = VAL_list, Y_all
+        y_axis = "logT"
+        value_axis = "logRho"
+        y_units = ""
+
     # Filter profiles where this value_axis was missing
     valid_idx = [j for j, v in enumerate(VAL_list) if v is not None]
     if not valid_idx:
@@ -238,7 +245,10 @@ def _draw_heatmap(
 
     plt.xlabel(x_label)
 
-    plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
+    if y_units:
+        plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
+    else:
+        plt.ylabel(utils.pretty_axis_name(y_axis))
     plt.tight_layout()
     out_path = (
         f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/"

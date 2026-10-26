@@ -162,13 +162,11 @@ for mass, names in folders_for_graphs.items():
         if "ours" in name:
             hm_value_axes = [
                 "extra_opacity_factor",
-                "temperature",
                 "logT",
                 "L_div_Ledd_effective",
             ]
             hm_normalize_map = {
                 "extra_opacity_factor": True,
-                "temperature": False,
                 "logT": False,
                 "L_div_Ledd_effective": False,
             }
