@@ -436,3 +436,102 @@ def plot_percentages(mass: int, names: list[str], phase: str = ""):
     plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"    Saved: {out_path}")
+
+
+def plot_taus(mass: int, names: list[str], phase: str = ""):
+    """Plot tauM, tauH, tauHt vs star age for the 'ours' model only.
+
+    tauM = (dM/dt)/M, M = star_mass
+    tauH = (dH/dt)/H, H = center_h1 (hydrogen in core)
+    tauHt = (dHt/dt)/Ht, Ht = total hydrogen % in star = 100*total_mass_h1/star_mass
+    """
+    phase_suffix = f"_{phase}" if phase else ""
+    plt.figure()
+    any_plotted = False
+    mass_initial = None
+
+    for name in names:
+        if "ours" not in name:
+            continue
+        try:
+            history = mr.MesaData(f"{mass}m-{name}/LOGS/history.data")
+        except Exception as e:
+            print(f"    taus({name}): could not read history: {e}")
+            continue
+        if not (
+            hasattr(history, "star_age")
+            and hasattr(history, "star_mass")
+            and hasattr(history, "center_h1")
+            and hasattr(history, "total_mass_h1")
+        ):
+            print(f"    taus({name}): missing history columns")
+            continue
+
+        age = np.array(history.star_age, dtype=float)
+        M = np.array(history.star_mass, dtype=float)
+        Hc = np.array(history.center_h1, dtype=float)
+        Ht_total = np.array(history.total_mass_h1, dtype=float)
+
+        order = np.argsort(age)
+        age = age[order]
+        M = M[order]
+        Hc = Hc[order]
+        Ht_total = Ht_total[order]
+
+        Ht_pct = 100.0 * Ht_total / M
+        if not any_plotted:
+            mass_initial = M[0]
+
+        def _fr(x, t):
+            x = np.asarray(x, dtype=float)
+            t = np.asarray(t, dtype=float)
+            o = np.argsort(t)
+            x = x[o]
+            t = t[o]
+            dxdt = np.gradient(x, t)
+            res = np.full_like(dxdt, np.nan, dtype=float)
+            np.divide(dxdt, x, out=res, where=x != 0)
+            return t[o], res
+
+        t_m, tau_m = _fr(M, age)
+        t_h, tau_h = _fr(Hc, age)
+        t_ht, tau_ht = _fr(Ht_pct, age)
+
+        t_end = np.max(age)
+        x_m = np.maximum(t_end - t_m, 0.0)
+        x_h = np.maximum(t_end - t_h, 0.0)
+        x_ht = np.maximum(t_end - t_ht, 0.0)
+
+        plt.plot(x_m, tau_m, color="C0", linestyle="-", linewidth=1.6, label=r"$\tau_M = \dot M/M$")
+        plt.plot(x_h, tau_h, color="C1", linestyle="--", linewidth=1.6, label=r"$\tau_H = \dot H/H$ ($H=\text{center }H_1$)")
+        plt.plot(x_ht, tau_ht, color="C2", linestyle="-.", linewidth=1.6, label=r"$\tau_{Ht} = \dot H_t/H_t$ ($H_t=\text{total }H/M\times100\%$)")
+        any_plotted = True
+        break
+
+    if not any_plotted:
+        plt.close()
+        print("    taus: nothing to plot")
+        return
+
+    ax = plt.gca()
+    plt.xlabel("Star Time To Live [years]")
+    plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ [1/yr]")
+    ax.invert_xaxis()
+    ax.set_xscale("log")
+    ax.set_yscale("symlog", linthresh=1e-15)
+    plt.grid(True, which="both")
+    plt.legend(fontsize=8)
+    if mass_initial is not None and np.isfinite(mass_initial):
+        plt.text(
+            0.02, 0.95, f"$M_{{\\rm init}}={mass_initial:.4g}\\,M_\\odot$",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none"},
+        )
+    plt.tight_layout()
+
+    out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}"
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_time.png"
+    plt.savefig(out_path, dpi=300)
+    plt.close()
+    print(f"    Saved: {out_path}")

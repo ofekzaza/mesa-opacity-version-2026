@@ -152,6 +152,11 @@ for mass, names in folders_for_graphs.items():
         except Exception as e:
             print(f"    evolution_graph percentages failed: {e}")
 
+        try:
+            evolution_graph.plot_taus(mass, phase_names, phase=phase)
+        except Exception as e:
+            print(f"    evolution_graph taus failed: {e}")
+
     # ------------------------------------------------------------------
     # Individual per-folder plots
     # One streaming pass per name feeds both HeatMapCollector and
