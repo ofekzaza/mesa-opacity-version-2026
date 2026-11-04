@@ -16,7 +16,7 @@
    save_model_filename = '15M_at_TAMS.mod'
 
    ! display on-screen plots
-   pgstar_flag = .true.
+   pgstar_flag = .false.
 
 / ! end of star_job namelist
 
@@ -57,7 +57,7 @@
    ! when to stop — end at ZAMS (nuclear luminosity reaches 99% of surface L)
     !stop_near_zams = .true.
     
-    stop_at_phase_O_Burn = .true. ! lets run it until it is broken
+    stop_at_phase_Si_Burn = .true. ! lets run it until it is broken
 
     ! stop_at_phase_C_Burn = .true.
     ! stop_at_phase_Si_Burn = .true.
@@ -89,11 +89,13 @@
    ! timesteps
     ! time_delta_coeff = 2
     
-    time_delta_coeff = 0.5
+    time_delta_coeff = 1
 
     ! 1d-3
     varcontrol_target   = 1d-4
-    timestep_factor_for_retries = 0.75
+    timestep_factor_for_retries = 0.65
+
+    mesh_delta_coeff = 1.2
 
    ! mesh
 
