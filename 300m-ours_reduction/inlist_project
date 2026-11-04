@@ -42,10 +42,10 @@
 &controls
 
    ! see star/defaults/controls.defaults
-    terminal_interval = 1000
-    max_num_profile_models = 9999
-    history_interval = 100
-    profile_interval = 200
+    terminal_interval = 1250
+    max_num_profile_models = -1
+    history_interval = 150
+    profile_interval = 250
     photo_interval = 1000
 
    ! starting specifications
