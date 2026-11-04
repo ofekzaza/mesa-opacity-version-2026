@@ -59,6 +59,8 @@ Run logs are written to `run_log.txt`; read it to check the state of a run. Each
 
 If a run fails for a reason that is not a MESA failure, the watchdog restarts it automatically using the `re` command, resuming from the last saved photo.
 
+Usage: `watchdog.sh [--re] [run_dir] [idle_minutes]`. Pass `--re` to always start with `./re` (resume from the last photo) and never `./rn`, e.g. `../watchdog.sh --re`.
+
 # Creating graphs
 
 Once all simulations are finished, run `uv run main.py` to generate all the graphs in the `plotted_results` folder.

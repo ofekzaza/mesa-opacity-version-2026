@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
-# watchdog.sh [run_dir] [idle_minutes]
+# watchdog.sh [--re] [run_dir] [idle_minutes]
 # Runs ./rn (first time) or ./re (restart). If ./star stops writing to LOGS/
 # for idle_minutes while still running, kill it and run ./re again.
+#   --re   always start with ./re, never ./rn (resume from the last photo)
 set -u
-cd "${1:-.}" || exit 1
-idle=$(( ${2:-60} * 60 ))
+force_re=0
+args=()
+for a in "$@"; do
+  case "$a" in
+    --re|-re) force_re=1 ;;
+    *) args+=("$a") ;;
+  esac
+done
+cd "${args[0]:-.}" || exit 1
+idle=$(( ${args[1]:-60} * 60 ))
 trap 'pkill -f "./star"; exit 130' INT TERM
 
 while :; do
-  if [ -n "$(ls photos 2>/dev/null | head -1)" ]; then
+  if [ "$force_re" = 1 ] || [ -n "$(ls photos 2>/dev/null | head -1)" ]; then
     ./re >>watchdog.log 2>&1 &
   else
     ./rn >>watchdog.log 2>&1 &
