@@ -43,7 +43,7 @@
 
    ! see star/defaults/controls.defaults
     terminal_interval = 1250
-    max_num_profile_models = -1
+    max_num_profile_models = 99999
     history_interval = 150
     profile_interval = 250
     photo_interval = 1000
@@ -95,7 +95,7 @@
     varcontrol_target   = 1d-4
     timestep_factor_for_retries = 0.65
 
-    mesh_delta_coeff = 1.2
+    !mesh_delta_coeff = 1.2
 
    ! mesh
 
