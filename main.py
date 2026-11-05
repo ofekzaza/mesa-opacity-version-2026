@@ -1,5 +1,13 @@
 import json
 
+import matplotlib
+
+# Use a headless backend before any plotting module imports pyplot.  On macOS
+# the default ``macosx`` backend starts AppKit/XPC listeners, which emit
+# "NSXPCSharedListener ... Connection interrupted" warnings.  This must happen
+# before the imports below, since they import ``matplotlib.pyplot``.
+matplotlib.use("Agg")
+
 import evolution_graph
 import generic_last_log_plot
 import HEAT_MAP
