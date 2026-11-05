@@ -25,6 +25,10 @@ that layer so it does not vanish against the surface line.
 
 import os
 
+import matplotlib
+
+matplotlib.use("Agg")  # headless backend: avoids macOS AppKit/XPC listeners
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap
@@ -128,6 +132,9 @@ class KippenhahnCollector:
         # when burning is confined to a very thin layer, e.g. a nova shell).
         self.burn_min: float | None = None
         self.burn_max: float | None = None
+        # Enclosed-mass extent of the inversion regions.
+        self.inv_min: float | None = None
+        self.inv_max: float | None = None
 
     # ------------------------------------------------------------------
     def consume(self, prof) -> None:
@@ -196,6 +203,14 @@ class KippenhahnCollector:
             if order is not None:
                 grad_t = grad_t[order]
             inversion = grad_t < 0.0
+        if inversion.any():
+            im = mass[inversion]
+            self.inv_min = (
+                float(im[0]) if self.inv_min is None else min(self.inv_min, float(im[0]))
+            )
+            self.inv_max = (
+                float(im[-1]) if self.inv_max is None else max(self.inv_max, float(im[-1]))
+            )
 
         # --- porosity reduction --------------------------------------
         factor = _arr(prof, "extra_opacity_factor")
@@ -285,35 +300,48 @@ class KippenhahnCollector:
 
         # If all burning happens in a very thin layer (e.g. the shell of a
         # nova), the linear mass axis makes it disappear against the surface.
-        # Add a zoomed pair of plots around that layer.
+        # Add a zoomed pair of plots around that layer.  The same applies to
+        # very thin inversion shells, which the coarse mass grid cannot resolve.
+        thin_target = None
+        thin_lo = None
+        thin_hi = None
         if (
             self.burn_min is not None
             and ymax > 0.0
             and 0.0 < (self.burn_max - self.burn_min) < 0.02 * ymax
         ):
-            span = self.burn_max - self.burn_min
-            lo = max(0.0, self.burn_min - 0.15 * span)
-            hi = min(ymax, self.burn_max + 0.15 * span)
-            if 0.0 < (hi - lo) < 0.05 * ymax:
-                y_zoom = np.linspace(lo, hi, n_y)
-                zburn, zmix, zinv, zred = build_grids(y_zoom)
-                self._render_pair(
-                    mass=mass,
-                    name=name,
-                    out_dir=out_dir,
-                    mn=mn,
-                    age=age,
-                    y=y_zoom,
-                    burn_grid=zburn,
-                    mix_grid=zmix,
-                    inv_grid=zinv,
-                    red_grid=zred,
-                    surface=surface,
-                    core_lines=core_lines,
-                    y_lim=(lo, hi),
-                    suffix="_zoom",
-                    title_suffix=" (zoom)",
-                )
+            thin_target, span = "burn", self.burn_max - self.burn_min
+            thin_lo = max(0.0, self.burn_min - 0.15 * span)
+            thin_hi = min(ymax, self.burn_max + 0.15 * span)
+        elif (
+            self.inv_min is not None
+            and ymax > 0.0
+            and 0.0 < (self.inv_max - self.inv_min) < 0.02 * ymax
+        ):
+            thin_target, span = "inv", self.inv_max - self.inv_min
+            thin_lo = max(0.0, self.inv_min - 0.15 * span)
+            thin_hi = min(ymax, self.inv_max + 0.15 * span)
+
+        if thin_target is not None and 0.0 < (thin_hi - thin_lo) < 0.05 * ymax:
+            y_zoom = np.linspace(thin_lo, thin_hi, n_y)
+            zburn, zmix, zinv, zred = build_grids(y_zoom)
+            self._render_pair(
+                mass=mass,
+                name=name,
+                out_dir=out_dir,
+                mn=mn,
+                age=age,
+                y=y_zoom,
+                burn_grid=zburn,
+                mix_grid=zmix,
+                inv_grid=zinv,
+                red_grid=zred,
+                surface=surface,
+                core_lines=core_lines,
+                y_lim=(thin_lo, thin_hi),
+                suffix="_zoom",
+                title_suffix=" (zoom)",
+            )
 
     # ------------------------------------------------------------------
     def _render_pair(
