@@ -517,7 +517,7 @@ def plot_taus(mass: int, names: list[str], phase: str = ""):
     plt.xlabel("Star Time To Live [years]")
     plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ [1/yr]")
     ax.invert_xaxis()
-    ax.set_xscale("log")
+    # ax.set_xscale("log") # lets try with no log scale
     ax.set_yscale("symlog", linthresh=1e-15)
     plt.grid(True, which="both")
     plt.legend(fontsize=8)

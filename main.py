@@ -4,6 +4,7 @@ import evolution_graph
 import generic_last_log_plot
 import HEAT_MAP
 import hr_diagram_script
+import kippenhahn_plot
 import material_composition_plot
 from stream import stream_profiles
 
@@ -82,8 +83,8 @@ folders_for_graphs = {
     100: [
         "ours_reduction",
         "ours_reduction_post",
-        "supereduction_a=2_reduction",
-        "supereduction_a=2_reduction_post",
+        # "supereduction_a=2_reduction",
+        # "supereduction_a=2_reduction_post",
     ],
     300: [
         "ours_reduction",
@@ -159,8 +160,8 @@ for mass, names in folders_for_graphs.items():
 
     # ------------------------------------------------------------------
     # Individual per-folder plots
-    # One streaming pass per name feeds both HeatMapCollector and
-    # CompositionEvolutionCollector — profiles are read exactly once.
+    # One streaming pass per name feeds the HeatMap, CompositionEvolution and
+    # Kippenhahn collectors — profiles are read exactly once.
     # ------------------------------------------------------------------
     for name, phase in grouped:
         print(f"  individual plots for {name} (phase={phase or 'none'})...")
@@ -187,10 +188,11 @@ for mass, names in folders_for_graphs.items():
         # Set up streaming collectors
         hm_collector = HEAT_MAP.HeatMapCollector(value_axes=hm_value_axes)
         evo_collector = material_composition_plot.CompositionEvolutionCollector()
+        kipp_collector = kippenhahn_plot.KippenhahnCollector()
 
-        # Single pass through all profiles — both collectors consume each profile
+        # Single pass through all profiles — all collectors consume each profile
         print(f"    streaming {logs_path}...")
-        stream_profiles(logs_path, [hm_collector, evo_collector])
+        stream_profiles(logs_path, [hm_collector, evo_collector, kipp_collector])
 
         # Load last profile once for snapshot plots
         last_prof = material_composition_plot.load_last_profile(mass, name)
@@ -212,5 +214,11 @@ for mass, names in folders_for_graphs.items():
             )
         except Exception as e:
             print(f"    HEAT_MAP({name}) failed: {e}")
+
+        # Render Kippenhahn diagrams from the same streaming pass
+        try:
+            kipp_collector.render(mass, name, phase=phase)
+        except Exception as e:
+            print(f"    KIPPENHAHN({name}) failed: {e}")
 
     print("\n")
