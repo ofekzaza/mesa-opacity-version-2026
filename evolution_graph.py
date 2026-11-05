@@ -438,16 +438,74 @@ def plot_percentages(mass: int, names: list[str], phase: str = ""):
     print(f"    Saved: {out_path}")
 
 
+def _draw_tau_figure(
+    *,
+    x,
+    series,
+    xlabel,
+    out_path,
+    invert_x,
+    mass_initial,
+    secondary_age=None,
+):
+    """Render one tau plot, optionally annotating model ticks with star age."""
+    plt.figure()
+    for tau, color, linestyle, label in series:
+        plt.plot(
+            x, tau, color=color, linestyle=linestyle,
+            linewidth=1.6, label=label,
+        )
+
+    ax = plt.gca()
+    plt.xlabel(xlabel)
+    plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ [1/yr]")
+    if invert_x:
+        ax.invert_xaxis()
+    # ax.set_xscale("log") # lets try with no log scale
+    ax.set_yscale("symlog", linthresh=1e-15)
+    plt.grid(True, which="both")
+    plt.legend(fontsize=8)
+
+    if mass_initial is not None and np.isfinite(mass_initial):
+        plt.text(
+            0.02, 0.95, f"$M_{{\\rm init}}={mass_initial:.4g}\\,M_\\odot$",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none"},
+        )
+
+    if secondary_age is not None:
+        lo, hi = float(np.min(x)), float(np.max(x))
+        # Avoid the default line-plot margin, which would show model numbers
+        # below zero at the left edge.
+        ax.set_xlim(lo, hi)
+        ax.xaxis.set_major_locator(plt.MaxNLocator(6, integer=True))
+        xticks = [t for t in ax.get_xticks() if lo <= t <= hi]
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(
+            [
+                f"{int(round(t))}\n{np.interp(t, x, secondary_age):.2e}"
+                for t in xticks
+            ]
+        )
+
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=300)
+    plt.close()
+    print(f"    Saved: {out_path}")
+
+
 def plot_taus(mass: int, names: list[str], phase: str = ""):
-    """Plot tauM, tauH, tauHt vs star age for the 'ours' model only.
+    """Plot tauM, tauH, tauHt for the 'ours' model only.
 
     tauM = (dM/dt)/M, M = star_mass
     tauH = (dH/dt)/H, H = center_h1 (hydrogen in core)
     tauHt = (dHt/dt)/Ht, Ht = total hydrogen % in star = 100*total_mass_h1/star_mass
+
+    Two versions are written: the original star-time-to-live axis, and a model
+    number axis with the corresponding star age printed under each tick.
     """
     phase_suffix = f"_{phase}" if phase else ""
-    plt.figure()
-    any_plotted = False
+    data = None
     mass_initial = None
 
     for name in names:
@@ -471,16 +529,22 @@ def plot_taus(mass: int, names: list[str], phase: str = ""):
         M = np.array(history.star_mass, dtype=float)
         Hc = np.array(history.center_h1, dtype=float)
         Ht_total = np.array(history.total_mass_h1, dtype=float)
+        mn = (
+            np.array(history.model_number, dtype=float)
+            if hasattr(history, "model_number")
+            else None
+        )
 
         order = np.argsort(age)
         age = age[order]
         M = M[order]
         Hc = Hc[order]
         Ht_total = Ht_total[order]
+        if mn is not None:
+            mn = mn[order]
 
         Ht_pct = 100.0 * Ht_total / M
-        if not any_plotted:
-            mass_initial = M[0]
+        mass_initial = M[0]
 
         def _fr(x, t):
             x = np.asarray(x, dtype=float)
@@ -493,45 +557,68 @@ def plot_taus(mass: int, names: list[str], phase: str = ""):
             np.divide(dxdt, x, out=res, where=x != 0)
             return t[o], res
 
-        t_m, tau_m = _fr(M, age)
-        t_h, tau_h = _fr(Hc, age)
-        t_ht, tau_ht = _fr(Ht_pct, age)
-
-        t_end = np.max(age)
-        x_m = np.maximum(t_end - t_m, 0.0)
-        x_h = np.maximum(t_end - t_h, 0.0)
-        x_ht = np.maximum(t_end - t_ht, 0.0)
-
-        plt.plot(x_m, tau_m, color="C0", linestyle="-", linewidth=1.6, label=r"$\tau_M = \dot M/M$")
-        plt.plot(x_h, tau_h, color="C1", linestyle="--", linewidth=1.6, label=r"$\tau_H = \dot H/H$ ($H=\text{center }H_1$)")
-        plt.plot(x_ht, tau_ht, color="C2", linestyle="-.", linewidth=1.6, label=r"$\tau_{Ht} = \dot H_t/H_t$ ($H_t=\text{total }H/M\times100\%$)")
-        any_plotted = True
+        _t_m, tau_m = _fr(M, age)
+        _t_h, tau_h = _fr(Hc, age)
+        _t_ht, tau_ht = _fr(Ht_pct, age)
+        data = {
+            "age": age,
+            "model_number": mn,
+            "series": [
+                (tau_m, "C0", "-", r"$\tau_M = \dot M/M$"),
+                (
+                    tau_h,
+                    "C1",
+                    "--",
+                    r"$\tau_H = \dot H/H$ ($H=\text{center }H_1$)",
+                ),
+                (
+                    tau_ht,
+                    "C2",
+                    "-.",
+                    r"$\tau_{Ht} = \dot H_t/H_t$ "
+                    r"($H_t=\text{total }H/M\times100\%$)",
+                ),
+            ],
+        }
         break
 
-    if not any_plotted:
-        plt.close()
+    if data is None:
         print("    taus: nothing to plot")
         return
 
-    ax = plt.gca()
-    plt.xlabel("Star Time To Live [years]")
-    plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ [1/yr]")
-    ax.invert_xaxis()
-    # ax.set_xscale("log") # lets try with no log scale
-    ax.set_yscale("symlog", linthresh=1e-15)
-    plt.grid(True, which="both")
-    plt.legend(fontsize=8)
-    if mass_initial is not None and np.isfinite(mass_initial):
-        plt.text(
-            0.02, 0.95, f"$M_{{\\rm init}}={mass_initial:.4g}\\,M_\\odot$",
-            transform=ax.transAxes, va="top", fontsize=10,
-            bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none"},
-        )
-    plt.tight_layout()
-
     out_dir = f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}"
     os.makedirs(out_dir, exist_ok=True)
-    out_path = f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_time.png"
-    plt.savefig(out_path, dpi=300)
-    plt.close()
-    print(f"    Saved: {out_path}")
+
+    # Original version: star time to live.
+    t_end = np.max(data["age"])
+    x_time = np.maximum(t_end - data["age"], 0.0)
+    _draw_tau_figure(
+        x=x_time,
+        series=data["series"],
+        xlabel="Star Time To Live [years]",
+        out_path=f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_time.png",
+        invert_x=True,
+        mass_initial=mass_initial,
+    )
+
+    # Model-number version, with the corresponding star age under each tick.
+    mn = data["model_number"]
+    if mn is not None and len(mn) == len(data["age"]):
+        model_order = np.argsort(mn)
+        x_model = mn[model_order]
+        age_model = data["age"][model_order]
+        series_model = [
+            (tau[model_order], color, linestyle, label)
+            for tau, color, linestyle, label in data["series"]
+        ]
+        _draw_tau_figure(
+            x=x_model,
+            series=series_model,
+            xlabel="Model Number\n(Star Age [years])",
+            out_path=f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_model_number.png",
+            invert_x=False,
+            mass_initial=mass_initial,
+            secondary_age=age_model,
+        )
+    else:
+        print(f"    taus: no model_number column for {mass}m")
