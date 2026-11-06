@@ -12,6 +12,8 @@ Encoded regions
 * Mixing regions from ``mix_type`` (convection, overshoot, semiconvection,
   thermohaline, rotation, ...).
 * Temperature inversions (``gradT < 0``).
+* Density inversions ("inflation") in the outer envelope, where
+  ``logRho`` increases outwards before decreasing again.
 * Porosity reduction regions (``extra_opacity_factor < 1``), when the run
   has this column.
 
@@ -94,6 +96,13 @@ REDUCTION_LIMIT = 1.0 - 1e-6
 # step towards a smaller opacity factor is drawn darker.
 REDUCTION_STEP = 0.025
 
+# Density-inversion ("inflation") detection.  A zone is marked when logRho
+# increases outwards over a contiguous run by at least this many dex and the
+# run lies in the outer part of the star.  The small numeric threshold rejects
+# profile-to-profile noise while keeping genuine envelope inversions.
+INFLATION_MIN_DELTA = 0.05
+INFLATION_OUTER_Q = 0.5
+
 # Number of mass points in the interpolated Kippenhahn grid.
 DEFAULT_N_Y = 600
 
@@ -130,6 +139,9 @@ class KippenhahnCollector:
         # Otherwise each entry is the reduction fraction ``1 - f_kappa`` per
         # zone, with 0 where there is no reduction.
         self.red_all: list[np.ndarray | None] = []
+        # ``None`` means this run has no logRho column.  Otherwise each entry
+        # is a boolean mask of zones inside a significant density inversion.
+        self.infl_all: list[np.ndarray | None] = []
 
     # ------------------------------------------------------------------
     def consume(self, prof) -> None:
@@ -189,6 +201,16 @@ class KippenhahnCollector:
                 grad_t = grad_t[order]
             inversion = grad_t < 0.0
 
+        # --- density inversion ("inflation") --------------------------
+        logrho = getattr(prof, "logRho", None)
+        if logrho is None:
+            inflation = None
+        else:
+            logrho = np.asarray(logrho, dtype=float)
+            if order is not None:
+                logrho = logrho[order]
+            inflation = _density_inversion_mask(mass, logrho)
+
         # --- porosity reduction --------------------------------------
         factor = _arr(prof, "extra_opacity_factor")
         if factor is None:
@@ -211,6 +233,7 @@ class KippenhahnCollector:
         self.burn_all.append(burn)
         self.inv_all.append(inversion)
         self.red_all.append(reduction)
+        self.infl_all.append(inflation)
 
     # ------------------------------------------------------------------
     def render(self, mass: int, name: str, phase: str = "", n_y: int = DEFAULT_N_Y) -> None:
@@ -231,6 +254,7 @@ class KippenhahnCollector:
         burn_all = [self.burn_all[i] for i in order]
         inv_all = [self.inv_all[i] for i in order]
         red_all = [self.red_all[i] for i in order]
+        infl_all = [self.infl_all[i] for i in order]
 
         # Common enclosed-mass grid.  Regions above a profile's surface are
         # masked out, which naturally shows the shrinking surface if the run
@@ -247,27 +271,34 @@ class KippenhahnCollector:
             burn = np.full((len(y_grid), len(mn)), np.nan)
             mix = np.full((len(y_grid), len(mn)), np.nan)
             inv = np.zeros((len(y_grid), len(mn)), dtype=bool)
+            infl = np.zeros((len(y_grid), len(mn)), dtype=bool)
             red = np.zeros((len(y_grid), len(mn)), dtype=float)
-            # A porosity-reduction layer can be many orders of magnitude thinner
-            # than one grid cell (e.g. the near-surface layers of the 40 m and
-            # 100 m runs).  Give such layers a minimum on-screen thickness so
-            # their presence is visible instead of falling between grid points.
+            # Thin regions (e.g. the near-surface layers of the 40 m and 100 m
+            # runs) can be many orders of magnitude thinner than one grid cell.
+            # Give them a minimum on-screen thickness so they remain visible
+            # instead of falling between two grid points.
             dy = float(y_grid[1] - y_grid[0]) if len(y_grid) > 1 else 0.0
-            red_min_thickness = 1.5 * dy
+            min_thickness = 1.5 * dy
             for j, m in enumerate(mass_all):
                 burn[:, j] = _map_to_grid(m, burn_all[j], y_grid)
                 mix[:, j] = _map_to_grid(m, mix_all[j], y_grid)
                 inv[:, j] = _map_to_grid(m, inv_all[j].astype(float), y_grid) > 0.5
+                if infl_all[j] is not None:
+                    infl[:, j] = _region_to_grid(
+                        m, infl_all[j], y_grid,
+                        min_thickness=min_thickness,
+                        surface=m[-1],
+                    )
                 if red_all[j] is not None:
                     red[:, j] = _reduction_to_grid(
                         m, red_all[j], y_grid,
-                        min_thickness=red_min_thickness,
+                        min_thickness=min_thickness,
                         surface=m[-1],
                     )
                 surface[j] = m[-1]
-            return burn, mix, inv, red
+            return burn, mix, inv, infl, red
 
-        burn_grid, mix_grid, inv_grid, red_grid = build_grids(y)
+        burn_grid, mix_grid, inv_grid, infl_grid, red_grid = build_grids(y)
 
         core_lines = _load_core_lines(mass, name, mn, ymax)
 
@@ -281,6 +312,7 @@ class KippenhahnCollector:
             burn_grid=burn_grid,
             mix_grid=mix_grid,
             inv_grid=inv_grid,
+            infl_grid=infl_grid,
             red_grid=red_grid,
             surface=surface,
             core_lines=core_lines,
@@ -300,6 +332,7 @@ class KippenhahnCollector:
         burn_grid,
         mix_grid,
         inv_grid,
+        infl_grid,
         red_grid,
         surface,
         core_lines,
@@ -332,6 +365,7 @@ class KippenhahnCollector:
             burn_grid=burn_grid[:, reorder],
             mix_grid=mix_grid[:, reorder],
             inv_grid=inv_grid[:, reorder],
+            infl_grid=infl_grid[:, reorder],
             red_grid=red_grid[:, reorder],
             surface=surface[reorder],
             core_lines=core_ttl,
@@ -351,6 +385,7 @@ class KippenhahnCollector:
         burn_grid,
         mix_grid,
         inv_grid,
+        infl_grid,
         red_grid,
         surface,
         core_lines,
@@ -421,7 +456,30 @@ class KippenhahnCollector:
                 )
             )
 
-        # 4. Porosity reduction: grey bands (darker = stronger reduction) with
+        # 4. Inflation (density inversion): amber fill + continuous outline.
+        # These are outer-envelope zones where logRho increases outwards before
+        # decreasing again, so they appear as isolated bands in mass.
+        infl_handles = []
+        infl_colour = "#E69F00"
+        infl_face = (0.90, 0.62, 0.00, 0.18)
+        if can_contour and infl_grid.any():
+            ax.contourf(
+                x, y, infl_grid.astype(float), levels=[0.5, 1.5],
+                colors=[infl_face], zorder=3.5,
+            )
+            ax.contour(
+                x, y, infl_grid.astype(float), levels=[0.5],
+                colors=infl_colour, linestyles="-", linewidths=1.5, zorder=4.5,
+            )
+            infl_handles.append(
+                Patch(
+                    facecolor=infl_face, edgecolor=infl_colour,
+                    linestyle="-", linewidth=1.5,
+                    label="Inflation",
+                )
+            )
+
+        # 5. Porosity reduction: grey bands (darker = stronger reduction) with
         # a continuous outline.  The bands are kept strong enough that a thin,
         # one-cell-tall layer is still visible.
         red_handles = []
@@ -449,11 +507,11 @@ class KippenhahnCollector:
                 Patch(
                     facecolor=(0.42, 0.42, 0.42, 0.55),
                     edgecolor="#2F2F2F", linestyle="-", linewidth=1.3,
-                    label=r"Porosity reduction ($f_\kappa<1$; darker = stronger)",
+                    label=r"Porosity reduction",
                 )
             )
 
-        # 5. Surface and core boundaries.  Use the same red dashed style as the
+        # 6. Surface and core boundaries.  Use the same red dashed style as the
         # star boundaries in the heat maps.
         ax.plot(
             x, surface, color="red", linewidth=1.5, linestyle="--", zorder=6,
@@ -468,7 +526,7 @@ class KippenhahnCollector:
                            linestyle="--", label=label)
             )
 
-        # 6. Axes, legends, output.
+        # 7. Axes, legends, output.
         ax.set_xlim(float(np.min(x)), float(np.max(x)))
         ax.set_ylim(float(y_lim[0]), float(y_lim[1]))
         if float(y_lim[1]) - float(y_lim[0]) < 0.01:
@@ -487,7 +545,7 @@ class KippenhahnCollector:
             if np.any(burn_grid == i + 1)
         ]
         all_handles = (
-            burn_handles + inv_handles + red_handles + core_handles
+            burn_handles + inv_handles + infl_handles + red_handles + core_handles
             + [
                 plt.Line2D(
                     [], [], color="red", linewidth=1.5, linestyle="--",
@@ -529,6 +587,98 @@ def _map_to_grid(m, values, y):
     choose = np.where(np.abs(m[idx] - y) <= np.abs(m[left] - y), idx, left)
     out = values[choose].astype(float, copy=True)
     out[y > m[-1]] = np.nan
+    return out
+
+
+def _density_inversion_mask(m, logrho, min_delta=INFLATION_MIN_DELTA,
+                            outer_q=INFLATION_OUTER_Q):
+    """Return zones that belong to a significant outer density inversion.
+
+    A density inversion is a contiguous run where ``logRho`` increases
+    outwards (``d logRho / dm > 0``) instead of the usual decrease.  Only runs
+    in the outer envelope (``m / m_surface >= outer_q``) with a total rise of
+    at least ``min_delta`` dex are kept, so profile noise does not fill the
+    diagram.  The surrounding zones must decrease again on both sides, which
+    selects the down-up-down pattern of an inflated layer.
+    """
+    m = np.asarray(m, dtype=float)
+    logrho = np.asarray(logrho, dtype=float)
+    out = np.zeros(m.size, dtype=bool)
+    if m.size < 3 or logrho.size != m.size:
+        return out
+
+    valid = np.isfinite(logrho)
+    q = m / m[-1] if m[-1] > 0.0 else np.zeros_like(m)
+    rising = (np.diff(logrho) > 0.0) & valid[:-1] & valid[1:]
+    rising &= q[:-1] >= outer_q
+    idx = np.flatnonzero(rising)
+    if idx.size == 0:
+        return out
+
+    runs = np.split(idx, np.where(np.diff(idx) > 1)[0] + 1)
+    n = logrho.size
+    for run in runs:
+        i0 = int(run[0])
+        i1 = int(run[-1]) + 1
+        if (logrho[i1] - logrho[i0]) < min_delta:
+            continue
+        # Require a decrease immediately inside and outside the rising run.
+        if i0 > 0 and valid[i0 - 1] and logrho[i0] >= logrho[i0 - 1]:
+            continue
+        if i1 + 1 < n and valid[i1 + 1] and logrho[i1] <= logrho[i1 + 1]:
+            continue
+        out[i0:i1 + 1] = True
+    return out
+
+
+def _region_to_grid(m, mask, y, min_thickness=0.0, surface=None):
+    """Map a boolean zone mask onto the mass grid without losing thin layers.
+
+    Each contiguous run of True values is projected onto ``y``.  Runs thinner
+    than ``min_thickness`` are widened symmetrically around their centre (and
+    clipped to the stellar surface) so they still cover at least one grid row.
+    """
+    out = np.zeros(len(y), dtype=bool)
+    mask = np.asarray(mask, dtype=bool)
+    if not mask.any():
+        return out
+
+    idx = np.flatnonzero(mask)
+    runs = np.split(idx, np.where(np.diff(idx) > 1)[0] + 1)
+    top = float(m[-1]) if surface is None else float(surface)
+    for run in runs:
+        if run.size == 0:
+            continue
+        lo = float(m[run[0]])
+        hi = float(m[run[-1]])
+        if hi < lo:
+            lo, hi = hi, lo
+        lo = max(0.0, min(lo, top))
+        hi = max(0.0, min(hi, top))
+        if min_thickness > 0.0 and (hi - lo) < min_thickness:
+            centre = 0.5 * (lo + hi)
+            lo = centre - 0.5 * min_thickness
+            hi = centre + 0.5 * min_thickness
+            # Keep the full visual thickness inside the star.  A layer sitting
+            # on the surface is pushed downwards rather than clipped in half.
+            if hi > top:
+                hi = top
+                lo = max(0.0, hi - min_thickness)
+            if lo < 0.0:
+                lo = 0.0
+                hi = min(top, min_thickness)
+
+        first = int(np.searchsorted(y, lo, side="left"))
+        last = int(np.searchsorted(y, hi, side="right"))
+        if last <= first:
+            # The whole layer is thinner than one grid cell: light up the
+            # cell closest to its centre.
+            first = int(np.argmin(np.abs(y - 0.5 * (lo + hi))))
+            last = first + 1
+        out[first:last] = True
+
+    # Never draw a region above the stellar surface.
+    out[y > top + 1e-12] = False
     return out
 
 
