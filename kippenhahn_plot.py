@@ -17,10 +17,6 @@ Encoded regions
 
 The heavy use of hatched, unfilled overlays means the burning colours stay
 readable even where several regions overlap.
-
-When all burning is confined to a very thin layer (for example the shell of a
-nova on a white dwarf), an extra pair of ``_zoom`` plots is produced around
-that layer so it does not vanish against the surface line.
 """
 
 import os
@@ -94,6 +90,10 @@ BURN_THRESHOLD = 1e-4
 # below this value.
 REDUCTION_LIMIT = 1.0 - 1e-6
 
+# Porosity-reduction shading is split into steps of this size (2.5 %).  Each
+# step towards a smaller opacity factor is drawn darker.
+REDUCTION_STEP = 0.025
+
 # Number of mass points in the interpolated Kippenhahn grid.
 DEFAULT_N_Y = 600
 
@@ -127,14 +127,9 @@ class KippenhahnCollector:
         self.burn_all: list[np.ndarray] = []
         self.inv_all: list[np.ndarray] = []
         # ``None`` means this run has no extra_opacity_factor column.
+        # Otherwise each entry is the reduction fraction ``1 - f_kappa`` per
+        # zone, with 0 where there is no reduction.
         self.red_all: list[np.ndarray | None] = []
-        # Enclosed-mass extent of all burning zones (used for an optional zoom
-        # when burning is confined to a very thin layer, e.g. a nova shell).
-        self.burn_min: float | None = None
-        self.burn_max: float | None = None
-        # Enclosed-mass extent of the inversion regions.
-        self.inv_min: float | None = None
-        self.inv_max: float | None = None
 
     # ------------------------------------------------------------------
     def consume(self, prof) -> None:
@@ -185,16 +180,6 @@ class KippenhahnCollector:
             0,
         ).astype(np.int8)
 
-        burning = burn > 0
-        if burning.any():
-            bm = mass[burning]
-            self.burn_min = (
-                float(bm[0]) if self.burn_min is None else min(self.burn_min, float(bm[0]))
-            )
-            self.burn_max = (
-                float(bm[-1]) if self.burn_max is None else max(self.burn_max, float(bm[-1]))
-            )
-
         # --- inversion ------------------------------------------------
         grad_t = _arr(prof, "gradT")
         if grad_t is None:
@@ -203,14 +188,6 @@ class KippenhahnCollector:
             if order is not None:
                 grad_t = grad_t[order]
             inversion = grad_t < 0.0
-        if inversion.any():
-            im = mass[inversion]
-            self.inv_min = (
-                float(im[0]) if self.inv_min is None else min(self.inv_min, float(im[0]))
-            )
-            self.inv_max = (
-                float(im[-1]) if self.inv_max is None else max(self.inv_max, float(im[-1]))
-            )
 
         # --- porosity reduction --------------------------------------
         factor = _arr(prof, "extra_opacity_factor")
@@ -221,7 +198,11 @@ class KippenhahnCollector:
                 factor = factor[order]
             # ``_arr`` turns missing values into 0; a real opacity factor is
             # always positive, so this avoids flagging NaNs as reduction.
-            reduction = (factor > 0.0) & (factor < REDUCTION_LIMIT)
+            reduction = np.where(
+                (factor > 0.0) & (factor < REDUCTION_LIMIT),
+                1.0 - factor,
+                0.0,
+            ).astype(float)
 
         self.model_numbers.append(float(getattr(prof, "model_number")))
         self.star_ages.append(float(getattr(prof, "star_age")))
@@ -266,13 +247,23 @@ class KippenhahnCollector:
             burn = np.full((len(y_grid), len(mn)), np.nan)
             mix = np.full((len(y_grid), len(mn)), np.nan)
             inv = np.zeros((len(y_grid), len(mn)), dtype=bool)
-            red = np.zeros((len(y_grid), len(mn)), dtype=bool)
+            red = np.zeros((len(y_grid), len(mn)), dtype=float)
+            # A porosity-reduction layer can be many orders of magnitude thinner
+            # than one grid cell (e.g. the near-surface layers of the 40 m and
+            # 100 m runs).  Give such layers a minimum on-screen thickness so
+            # their presence is visible instead of falling between grid points.
+            dy = float(y_grid[1] - y_grid[0]) if len(y_grid) > 1 else 0.0
+            red_min_thickness = 1.5 * dy
             for j, m in enumerate(mass_all):
                 burn[:, j] = _map_to_grid(m, burn_all[j], y_grid)
                 mix[:, j] = _map_to_grid(m, mix_all[j], y_grid)
                 inv[:, j] = _map_to_grid(m, inv_all[j].astype(float), y_grid) > 0.5
                 if red_all[j] is not None:
-                    red[:, j] = _map_to_grid(m, red_all[j].astype(float), y_grid) > 0.5
+                    red[:, j] = _reduction_to_grid(
+                        m, red_all[j], y_grid,
+                        min_thickness=red_min_thickness,
+                        surface=m[-1],
+                    )
                 surface[j] = m[-1]
             return burn, mix, inv, red
 
@@ -280,7 +271,7 @@ class KippenhahnCollector:
 
         core_lines = _load_core_lines(mass, name, mn, ymax)
 
-        self._render_pair(
+        self._render_plot(
             mass=mass,
             name=name,
             out_dir=out_dir,
@@ -294,57 +285,10 @@ class KippenhahnCollector:
             surface=surface,
             core_lines=core_lines,
             y_lim=(0.0, ymax),
-            suffix="",
-            title_suffix="",
         )
 
-        # If all burning happens in a very thin layer (e.g. the shell of a
-        # nova), the linear mass axis makes it disappear against the surface.
-        # Add a zoomed pair of plots around that layer.  The same applies to
-        # very thin inversion shells, which the coarse mass grid cannot resolve.
-        thin_target = None
-        thin_lo = None
-        thin_hi = None
-        if (
-            self.burn_min is not None
-            and ymax > 0.0
-            and 0.0 < (self.burn_max - self.burn_min) < 0.02 * ymax
-        ):
-            thin_target, span = "burn", self.burn_max - self.burn_min
-            thin_lo = max(0.0, self.burn_min - 0.15 * span)
-            thin_hi = min(ymax, self.burn_max + 0.15 * span)
-        elif (
-            self.inv_min is not None
-            and ymax > 0.0
-            and 0.0 < (self.inv_max - self.inv_min) < 0.02 * ymax
-        ):
-            thin_target, span = "inv", self.inv_max - self.inv_min
-            thin_lo = max(0.0, self.inv_min - 0.15 * span)
-            thin_hi = min(ymax, self.inv_max + 0.15 * span)
-
-        if thin_target is not None and 0.0 < (thin_hi - thin_lo) < 0.05 * ymax:
-            y_zoom = np.linspace(thin_lo, thin_hi, n_y)
-            zburn, zmix, zinv, zred = build_grids(y_zoom)
-            self._render_pair(
-                mass=mass,
-                name=name,
-                out_dir=out_dir,
-                mn=mn,
-                age=age,
-                y=y_zoom,
-                burn_grid=zburn,
-                mix_grid=zmix,
-                inv_grid=zinv,
-                red_grid=zred,
-                surface=surface,
-                core_lines=core_lines,
-                y_lim=(thin_lo, thin_hi),
-                suffix="_zoom",
-                title_suffix=" (zoom)",
-            )
-
     # ------------------------------------------------------------------
-    def _render_pair(
+    def _render_plot(
         self,
         *,
         mass,
@@ -360,8 +304,6 @@ class KippenhahnCollector:
         surface,
         core_lines,
         y_lim,
-        suffix,
-        title_suffix,
     ) -> None:
         # ---- time-to-live variant -----------------------------------
         age_order = np.argsort(age)
@@ -397,9 +339,7 @@ class KippenhahnCollector:
             log_x=True,
             invert_x=True,
             y_lim=y_lim,
-            out_path=(
-                f"{out_dir}/KIPPENHAHN_{mass}_{name}_vs_mass_xstar_age{suffix}.png"
-            ),
+            out_path=f"{out_dir}/KIPPENHAHN_{mass}_{name}_vs_mass_xstar_age.png",
         )
 
     # ------------------------------------------------------------------
@@ -481,30 +421,44 @@ class KippenhahnCollector:
                 )
             )
 
-        # 4. Porosity reduction: subtle grey fill + dotted outline.
+        # 4. Porosity reduction: grey bands (darker = stronger reduction) with
+        # a continuous outline.  The bands are kept strong enough that a thin,
+        # one-cell-tall layer is still visible.
         red_handles = []
-        if can_contour and red_grid.any():
-            cs = ax.contourf(
-                x, y, red_grid.astype(float), levels=[0.5, 1.5],
-                colors=[(0.25, 0.25, 0.25, 0.10)], zorder=4,
+        if can_contour and np.nanmax(red_grid) > 0.0:
+            red_plot = np.where(red_grid > 0.0, red_grid, np.nan)
+            max_red = float(np.nanmax(red_plot))
+            n_bins = max(1, int(np.ceil(max_red / REDUCTION_STEP)))
+            levels = np.linspace(0.0, n_bins * REDUCTION_STEP, n_bins + 1)
+            shades = np.linspace(0.60, 0.15, n_bins)
+            alphas = np.linspace(0.35, 0.75, n_bins)
+            red_colors = [
+                (float(s), float(s), float(s), float(a))
+                for s, a in zip(shades, alphas)
+            ]
+            ax.contourf(
+                x, y, red_plot, levels=levels, colors=red_colors, zorder=4,
             )
-            cs.set_edgecolor("#555555")
-            cs.set_linewidth(0.0)
+            # Continuous edge around the whole reduction region.
+            red_mask = (red_grid > 0.0).astype(float)
             ax.contour(
-                x, y, red_grid.astype(float), levels=[0.5],
-                colors="#444444", linestyles=":", linewidths=1.2, zorder=5,
+                x, y, red_mask, levels=[0.5],
+                colors="#2F2F2F", linestyles="-", linewidths=1.3, zorder=5,
             )
             red_handles.append(
                 Patch(
-                    facecolor=(0.25, 0.25, 0.25, 0.10), edgecolor="#444444",
-                    linestyle=":", linewidth=1.2,
-                    label=r"Porosity reduction ($f_\kappa<1$)",
+                    facecolor=(0.42, 0.42, 0.42, 0.55),
+                    edgecolor="#2F2F2F", linestyle="-", linewidth=1.3,
+                    label=r"Porosity reduction ($f_\kappa<1$; darker = stronger)",
                 )
             )
 
-        # 5. Surface and core boundaries.
-        ax.plot(x, surface, color="black", linewidth=0.8, zorder=4,
-                label="Stellar surface")
+        # 5. Surface and core boundaries.  Use the same red dashed style as the
+        # star boundaries in the heat maps.
+        ax.plot(
+            x, surface, color="red", linewidth=1.5, linestyle="--", zorder=6,
+            label="Star Boundaries",
+        )
         core_handles = []
         for label, colour, values in core_lines.values():
             ax.plot(x, values, color=colour, linewidth=1.0, linestyle="--",
@@ -534,7 +488,12 @@ class KippenhahnCollector:
         ]
         all_handles = (
             burn_handles + inv_handles + red_handles + core_handles
-            + [plt.Line2D([], [], color="black", linewidth=0.8, label="Stellar surface")]
+            + [
+                plt.Line2D(
+                    [], [], color="red", linewidth=1.5, linestyle="--",
+                    label="Star Boundaries",
+                )
+            ]
             + mix_handles
         )
         leg = ax.legend(
@@ -570,6 +529,61 @@ def _map_to_grid(m, values, y):
     choose = np.where(np.abs(m[idx] - y) <= np.abs(m[left] - y), idx, left)
     out = values[choose].astype(float, copy=True)
     out[y > m[-1]] = np.nan
+    return out
+
+
+def _reduction_to_grid(m, reduction, y, min_thickness=0.0, surface=None):
+    """Map per-zone porosity reduction onto the mass grid.
+
+    ``reduction`` is ``1 - extra_opacity_factor`` indexed like the ascending
+    ``m`` array, with 0 where there is no reduction.  Thin layers are widened
+    to ``min_thickness`` and assigned the strongest reduction in the layer, so
+    they remain visible instead of falling between two grid points.
+    """
+    reduction = np.asarray(reduction, dtype=float)
+    mapped = _map_to_grid(m, reduction, y)
+    out = np.where(np.isnan(mapped), 0.0, np.clip(mapped, 0.0, None))
+    mask = reduction > 0.0
+    if not mask.any():
+        return out
+
+    idx = np.flatnonzero(mask)
+    runs = np.split(idx, np.where(np.diff(idx) > 1)[0] + 1)
+    top = float(m[-1]) if surface is None else float(surface)
+    for run in runs:
+        if run.size == 0:
+            continue
+        lo = float(m[run[0]])
+        hi = float(m[run[-1]])
+        if hi < lo:
+            lo, hi = hi, lo
+        lo = max(0.0, min(lo, top))
+        hi = max(0.0, min(hi, top))
+        peak = float(np.max(reduction[run]))
+        if min_thickness > 0.0 and (hi - lo) < min_thickness:
+            centre = 0.5 * (lo + hi)
+            lo = centre - 0.5 * min_thickness
+            hi = centre + 0.5 * min_thickness
+            # Keep the full visual thickness inside the star.  A layer sitting
+            # on the surface is pushed downwards rather than clipped in half.
+            if hi > top:
+                hi = top
+                lo = max(0.0, hi - min_thickness)
+            if lo < 0.0:
+                lo = 0.0
+                hi = min(top, min_thickness)
+
+            first = int(np.searchsorted(y, lo, side="left"))
+            last = int(np.searchsorted(y, hi, side="right"))
+            if last <= first:
+                # The whole layer is thinner than one grid cell: light up the
+                # cell closest to its centre.
+                first = int(np.argmin(np.abs(y - 0.5 * (lo + hi))))
+                last = first + 1
+            out[first:last] = np.maximum(out[first:last], peak)
+
+    # Never draw reduction above the stellar surface.
+    out[y > top + 1e-12] = 0.0
     return out
 
 
