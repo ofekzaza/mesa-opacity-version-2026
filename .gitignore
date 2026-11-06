@@ -17,3 +17,5 @@ star
 **/make/run_star.mod
 LOGS/
 watchdog.log
+archive.zip
+tmp/
