@@ -106,6 +106,12 @@ REDUCTION_STEP = 0.025
 INFLATION_MIN_DELTA = 0.05
 INFLATION_OUTER_Q = 0.5
 
+# The red star-boundary line is lifted slightly above the true surface and
+# drawn in the background (lowest zorder).  Inflation and porosity-reduction
+# outlines also run along the outer envelope, so this keeps the thick red
+# dashes from hiding them.  The lift is a fraction of the plotted mass range.
+SURFACE_OFFSET_FRAC = 0.003
+
 # Number of mass points in the interpolated Kippenhahn grid.
 DEFAULT_N_Y = 600
 
@@ -543,10 +549,15 @@ class KippenhahnCollector:
             )
 
         # 7. Surface and core boundaries.  Use the same red dashed style as the
-        # star boundaries in the heat maps.
+        # star boundaries in the heat maps.  Lift the surface line a little
+        # above the true surface and draw it in the first (background) layer so
+        # it cannot hide the inflation and porosity-reduction outlines.
+        surface_offset = SURFACE_OFFSET_FRAC * (
+            float(y_lim[1]) - float(y_lim[0])
+        )
         ax.plot(
-            x, surface, color="red", linewidth=1.5, linestyle="--", zorder=6,
-            label="Star Boundaries",
+            x, surface + surface_offset, color="red", linewidth=1.5,
+            linestyle="--", zorder=0, label="Star Boundaries",
         )
         core_handles = []
         for label, colour, values in core_lines.values():
@@ -559,7 +570,8 @@ class KippenhahnCollector:
 
         # 8. Axes, legends, output.
         ax.set_xlim(float(np.min(x)), float(np.max(x)))
-        ax.set_ylim(float(y_lim[0]), float(y_lim[1]))
+        # Leave headroom on top for the lifted star-boundary line.
+        ax.set_ylim(float(y_lim[0]), float(y_lim[1]) + surface_offset)
         if float(y_lim[1]) - float(y_lim[0]) < 0.01:
             ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.5f}"))
         if log_x:
