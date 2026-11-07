@@ -65,7 +65,7 @@ Usage: `watchdog.sh [--re] [run_dir] [idle_minutes]`. Pass `--re` to always star
 
 Once all simulations are finished, run `uv run main.py` to generate all the graphs in the `plotted_results` folder.
 
-Kippenhahn diagrams are generated per run by `kippenhahn_plot.py` and are included in the normal `main.py` pass. They show enclosed mass versus star time to live, with nuclear burning by fuel type, mixing regions (convection, overshoot, semiconvection, thermohaline, ...), temperature inversions (`gradT < 0`), density inversions in the outer envelope (inflation, where `logRho` increases outwards), and porosity-reduction regions (`extra_opacity_factor < 1`). To make one directly:
+Kippenhahn diagrams are generated per run by `kippenhahn_plot.py` and are included in the normal `main.py` pass. They show enclosed mass versus star time to live, with nuclear burning by fuel type, mixing regions (convection, overshoot, semiconvection, thermohaline, ...), temperature inversions (`gradT < 0`), density inversions in the outer envelope (inflation, where `logRho` increases outwards), and porosity-reduction regions (`extra_opacity_factor < 1`). Overlapping inflation and porosity zones keep both fills and get a dark solid border with an amber dashed overlay, so both remain visible in thin layers. To make one directly:
 
 ```sh
 uv run kippenhahn_plot.py 10 ours_reduction --phase pre_ms

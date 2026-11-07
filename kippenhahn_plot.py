@@ -16,6 +16,9 @@ Encoded regions
   ``logRho`` increases outwards before decreasing again.
 * Porosity reduction regions (``extra_opacity_factor < 1``), when the run
   has this column.
+* Zones where inflation and porosity reduction coincide keep both fills; their
+  shared border is drawn as a dark solid line with an amber dashed overlay so
+  both colours stay visible in thin overlap layers.
 
 The heavy use of hatched, unfilled overlays means the burning colours stay
 readable even where several regions overlap.
@@ -456,6 +459,15 @@ class KippenhahnCollector:
                 )
             )
 
+        # Inflation and porosity reduction can cover the same outer-envelope
+        # zones.  Draw both fills (porosity underneath, translucent amber
+        # inflation on top) so the overlap keeps a warm grey tint.  Their
+        # outlines use the same small linewidth; in the overlap the dark
+        # porosity line is overlaid with an amber dashed line instead of a
+        # wider amber halo, so both colours are visible without making either
+        # region look larger than it really is.
+        overlap = infl_grid & (red_grid > 0.0)
+
         # 4. Inflation (density inversion): amber fill + continuous outline.
         # These are outer-envelope zones where logRho increases outwards before
         # decreasing again, so they appear as isolated bands in mass.
@@ -481,9 +493,11 @@ class KippenhahnCollector:
 
         # 5. Porosity reduction: grey bands (darker = stronger reduction) with
         # a continuous outline.  The bands are kept strong enough that a thin,
-        # one-cell-tall layer is still visible.
+        # one-cell-tall layer is still visible.  The fill sits just below the
+        # inflation fill so both contribute in overlapping zones.
         red_handles = []
-        if can_contour and np.nanmax(red_grid) > 0.0:
+        red_mask = (red_grid > 0.0).astype(float)
+        if can_contour and red_mask.any():
             red_plot = np.where(red_grid > 0.0, red_grid, np.nan)
             max_red = float(np.nanmax(red_plot))
             n_bins = max(1, int(np.ceil(max_red / REDUCTION_STEP)))
@@ -495,10 +509,9 @@ class KippenhahnCollector:
                 for s, a in zip(shades, alphas)
             ]
             ax.contourf(
-                x, y, red_plot, levels=levels, colors=red_colors, zorder=4,
+                x, y, red_plot, levels=levels, colors=red_colors, zorder=3.4,
             )
             # Continuous edge around the whole reduction region.
-            red_mask = (red_grid > 0.0).astype(float)
             ax.contour(
                 x, y, red_mask, levels=[0.5],
                 colors="#2F2F2F", linestyles="-", linewidths=1.3, zorder=5,
@@ -511,7 +524,25 @@ class KippenhahnCollector:
                 )
             )
 
-        # 6. Surface and core boundaries.  Use the same red dashed style as the
+        # 6. Overlap outline.  Draw the dark porosity border along the shared
+        # boundary and an amber dashed line on top of it.  The equal on/off
+        # dash pattern alternates the two colours along the border, so both
+        # remain visible even for a layer that is only one grid row thick.
+        # Both lines have the same width, so the overlap does not exaggerate
+        # either region.
+        if can_contour and overlap.any():
+            both = overlap.astype(float)
+            ax.contour(
+                x, y, both, levels=[0.5],
+                colors="#2F2F2F", linestyles="-", linewidths=1.4, zorder=5.15,
+            )
+            ax.contour(
+                x, y, both, levels=[0.5],
+                colors=infl_colour, linestyles=[(0, (3, 3))],
+                linewidths=1.4, zorder=5.2,
+            )
+
+        # 7. Surface and core boundaries.  Use the same red dashed style as the
         # star boundaries in the heat maps.
         ax.plot(
             x, surface, color="red", linewidth=1.5, linestyle="--", zorder=6,
@@ -526,7 +557,7 @@ class KippenhahnCollector:
                            linestyle="--", label=label)
             )
 
-        # 7. Axes, legends, output.
+        # 8. Axes, legends, output.
         ax.set_xlim(float(np.min(x)), float(np.max(x)))
         ax.set_ylim(float(y_lim[0]), float(y_lim[1]))
         if float(y_lim[1]) - float(y_lim[0]) < 0.01:
