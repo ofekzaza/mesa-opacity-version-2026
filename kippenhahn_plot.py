@@ -110,7 +110,7 @@ INFLATION_OUTER_Q = 0.5
 # drawn in the background (lowest zorder).  Inflation and porosity-reduction
 # outlines also run along the outer envelope, so this keeps the thick red
 # dashes from hiding them.  The lift is a fraction of the plotted mass range.
-SURFACE_OFFSET_FRAC = 0.003
+SURFACE_OFFSET_FRAC = 0.0025
 
 # Number of mass points in the interpolated Kippenhahn grid.
 DEFAULT_N_Y = 600
@@ -539,12 +539,12 @@ class KippenhahnCollector:
         if can_contour and overlap.any():
             both = overlap.astype(float)
             ax.contour(
-                x, y, both, levels=[0.5],
-                colors="#2F2F2F", linestyles="-", linewidths=1.4, zorder=5.15,
+                x, y, both, levels=[0.2],
+                colors="#2F2F2F", linestyles="-", linewidths=1.4, zorder=5.2,
             )
             ax.contour(
-                x, y, both, levels=[0.5],
-                colors=infl_colour, linestyles=[(0, (3, 3))],
+                x, y, both, levels=[0.2],
+                colors=infl_colour, linestyles=[(0, (2, 2))],
                 linewidths=1.4, zorder=5.2,
             )
 
