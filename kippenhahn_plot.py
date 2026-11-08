@@ -461,7 +461,7 @@ class KippenhahnCollector:
             inv_handles.append(
                 Patch(
                     facecolor=(0.12, 0.47, 0.71, 0.18), edgecolor="#1F77B4",
-                    hatch="\\\\", label=r"Inversion ($\nabla_T<0$)",
+                    hatch="\\\\", label=r"Inversion ($\nabla T<0$)",
                 )
             )
 
@@ -493,7 +493,7 @@ class KippenhahnCollector:
                 Patch(
                     facecolor=infl_face, edgecolor=infl_colour,
                     linestyle="-", linewidth=1.5,
-                    label="Inflation",
+                    label="Density Inversion",
                 )
             )
 
