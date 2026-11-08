@@ -12,11 +12,11 @@ Encoded regions
 * Mixing regions from ``mix_type`` (convection, overshoot, semiconvection,
   thermohaline, rotation, ...).
 * Temperature inversions (``gradT < 0``).
-* Density inversions ("inflation") in the outer envelope, where
+* Density inversions (density inversion) in the outer envelope, where
   ``logRho`` increases outwards before decreasing again.
 * Porosity reduction regions (``extra_opacity_factor < 1``), when the run
   has this column.
-* Zones where inflation and porosity reduction coincide keep both fills; their
+* Zones where density inversion and porosity reduction coincide keep both fills; their
   shared border is drawn as a dark solid line with an amber dashed overlay so
   both colours stay visible in thin overlap layers.
 
@@ -99,15 +99,15 @@ REDUCTION_LIMIT = 1.0 - 1e-6
 # step towards a smaller opacity factor is drawn darker.
 REDUCTION_STEP = 0.025
 
-# Density-inversion ("inflation") detection.  A zone is marked when logRho
+# Density-inversion ("density_inversion") detection.  A zone is marked when logRho
 # increases outwards over a contiguous run by at least this many dex and the
 # run lies in the outer part of the star.  The small numeric threshold rejects
 # profile-to-profile noise while keeping genuine envelope inversions.
-INFLATION_MIN_DELTA = 0.05
-INFLATION_OUTER_Q = 0.5
+DENSITY_INVERSION_MIN_DELTA = 0.05
+DENSITY_INVERSION_OUTER_Q = 0.5
 
 # The red star-boundary line is lifted slightly above the true surface and
-# drawn in the background (lowest zorder).  Inflation and porosity-reduction
+# drawn in the background (lowest zorder).  Density inversion and porosity-reduction
 # outlines also run along the outer envelope, so this keeps the thick red
 # dashes from hiding them.  The lift is a fraction of the plotted mass range.
 SURFACE_OFFSET_FRAC = 0.0025
@@ -150,7 +150,7 @@ class KippenhahnCollector:
         self.red_all: list[np.ndarray | None] = []
         # ``None`` means this run has no logRho column.  Otherwise each entry
         # is a boolean mask of zones inside a significant density inversion.
-        self.infl_all: list[np.ndarray | None] = []
+        self.dens_inv_all: list[np.ndarray | None] = []
 
     # ------------------------------------------------------------------
     def consume(self, prof) -> None:
@@ -210,15 +210,15 @@ class KippenhahnCollector:
                 grad_t = grad_t[order]
             inversion = grad_t < 0.0
 
-        # --- density inversion ("inflation") --------------------------
+        # --- density inversion ("density_inversion") --------------------------
         logrho = getattr(prof, "logRho", None)
         if logrho is None:
-            inflation = None
+            density_inversion = None
         else:
             logrho = np.asarray(logrho, dtype=float)
             if order is not None:
                 logrho = logrho[order]
-            inflation = _density_inversion_mask(mass, logrho)
+            density_inversion = _density_inversion_mask(mass, logrho)
 
         # --- porosity reduction --------------------------------------
         factor = _arr(prof, "extra_opacity_factor")
@@ -242,7 +242,7 @@ class KippenhahnCollector:
         self.burn_all.append(burn)
         self.inv_all.append(inversion)
         self.red_all.append(reduction)
-        self.infl_all.append(inflation)
+        self.dens_inv_all.append(density_inversion)
 
     # ------------------------------------------------------------------
     def render(self, mass: int, name: str, phase: str = "", n_y: int = DEFAULT_N_Y) -> None:
@@ -263,7 +263,7 @@ class KippenhahnCollector:
         burn_all = [self.burn_all[i] for i in order]
         inv_all = [self.inv_all[i] for i in order]
         red_all = [self.red_all[i] for i in order]
-        infl_all = [self.infl_all[i] for i in order]
+        dens_inv_all = [self.dens_inv_all[i] for i in order]
 
         # Common enclosed-mass grid.  Regions above a profile's surface are
         # masked out, which naturally shows the shrinking surface if the run
@@ -280,7 +280,7 @@ class KippenhahnCollector:
             burn = np.full((len(y_grid), len(mn)), np.nan)
             mix = np.full((len(y_grid), len(mn)), np.nan)
             inv = np.zeros((len(y_grid), len(mn)), dtype=bool)
-            infl = np.zeros((len(y_grid), len(mn)), dtype=bool)
+            dens_inv = np.zeros((len(y_grid), len(mn)), dtype=bool)
             red = np.zeros((len(y_grid), len(mn)), dtype=float)
             # Thin regions (e.g. the near-surface layers of the 40 m and 100 m
             # runs) can be many orders of magnitude thinner than one grid cell.
@@ -292,9 +292,9 @@ class KippenhahnCollector:
                 burn[:, j] = _map_to_grid(m, burn_all[j], y_grid)
                 mix[:, j] = _map_to_grid(m, mix_all[j], y_grid)
                 inv[:, j] = _map_to_grid(m, inv_all[j].astype(float), y_grid) > 0.5
-                if infl_all[j] is not None:
-                    infl[:, j] = _region_to_grid(
-                        m, infl_all[j], y_grid,
+                if dens_inv_all[j] is not None:
+                    dens_inv[:, j] = _region_to_grid(
+                        m, dens_inv_all[j], y_grid,
                         min_thickness=min_thickness,
                         surface=m[-1],
                     )
@@ -305,9 +305,9 @@ class KippenhahnCollector:
                         surface=m[-1],
                     )
                 surface[j] = m[-1]
-            return burn, mix, inv, infl, red
+            return burn, mix, inv, dens_inv, red
 
-        burn_grid, mix_grid, inv_grid, infl_grid, red_grid = build_grids(y)
+        burn_grid, mix_grid, inv_grid, dens_inv_grid, red_grid = build_grids(y)
 
         core_lines = _load_core_lines(mass, name, mn, ymax)
 
@@ -321,7 +321,7 @@ class KippenhahnCollector:
             burn_grid=burn_grid,
             mix_grid=mix_grid,
             inv_grid=inv_grid,
-            infl_grid=infl_grid,
+            dens_inv_grid=dens_inv_grid,
             red_grid=red_grid,
             surface=surface,
             core_lines=core_lines,
@@ -341,7 +341,7 @@ class KippenhahnCollector:
         burn_grid,
         mix_grid,
         inv_grid,
-        infl_grid,
+        dens_inv_grid,
         red_grid,
         surface,
         core_lines,
@@ -374,7 +374,7 @@ class KippenhahnCollector:
             burn_grid=burn_grid[:, reorder],
             mix_grid=mix_grid[:, reorder],
             inv_grid=inv_grid[:, reorder],
-            infl_grid=infl_grid[:, reorder],
+            dens_inv_grid=dens_inv_grid[:, reorder],
             red_grid=red_grid[:, reorder],
             surface=surface[reorder],
             core_lines=core_ttl,
@@ -394,7 +394,7 @@ class KippenhahnCollector:
         burn_grid,
         mix_grid,
         inv_grid,
-        infl_grid,
+        dens_inv_grid,
         red_grid,
         surface,
         core_lines,
@@ -465,33 +465,33 @@ class KippenhahnCollector:
                 )
             )
 
-        # Inflation and porosity reduction can cover the same outer-envelope
+        # Density inversion and porosity reduction can cover the same outer-envelope
         # zones.  Draw both fills (porosity underneath, translucent amber
-        # inflation on top) so the overlap keeps a warm grey tint.  Their
+        # density_inversion on top) so the overlap keeps a warm grey tint.  Their
         # outlines use the same small linewidth; in the overlap the dark
         # porosity line is overlaid with an amber dashed line instead of a
         # wider amber halo, so both colours are visible without making either
         # region look larger than it really is.
-        overlap = infl_grid & (red_grid > 0.0)
+        overlap = dens_inv_grid & (red_grid > 0.0)
 
-        # 4. Inflation (density inversion): amber fill + continuous outline.
+        # 4. Density inversion: amber fill + continuous outline.
         # These are outer-envelope zones where logRho increases outwards before
         # decreasing again, so they appear as isolated bands in mass.
-        infl_handles = []
-        infl_colour = "#E69F00"
-        infl_face = (0.90, 0.62, 0.00, 0.18)
-        if can_contour and infl_grid.any():
+        dens_inv_handles = []
+        dens_inv_colour = "#E69F00"
+        dens_inv_face = (0.90, 0.62, 0.00, 0.18)
+        if can_contour and dens_inv_grid.any():
             ax.contourf(
-                x, y, infl_grid.astype(float), levels=[0.5, 1.5],
-                colors=[infl_face], zorder=3.5,
+                x, y, dens_inv_grid.astype(float), levels=[0.5, 1.5],
+                colors=[dens_inv_face], zorder=3.5,
             )
             ax.contour(
-                x, y, infl_grid.astype(float), levels=[0.5],
-                colors=infl_colour, linestyles="-", linewidths=1.5, zorder=4.5,
+                x, y, dens_inv_grid.astype(float), levels=[0.5],
+                colors=dens_inv_colour, linestyles="-", linewidths=1.5, zorder=4.5,
             )
-            infl_handles.append(
+            dens_inv_handles.append(
                 Patch(
-                    facecolor=infl_face, edgecolor=infl_colour,
+                    facecolor=dens_inv_face, edgecolor=dens_inv_colour,
                     linestyle="-", linewidth=1.5,
                     label="Density Inversion",
                 )
@@ -500,7 +500,7 @@ class KippenhahnCollector:
         # 5. Porosity reduction: grey bands (darker = stronger reduction) with
         # a continuous outline.  The bands are kept strong enough that a thin,
         # one-cell-tall layer is still visible.  The fill sits just below the
-        # inflation fill so both contribute in overlapping zones.
+        # density_inversion fill so both contribute in overlapping zones.
         red_handles = []
         red_mask = (red_grid > 0.0).astype(float)
         if can_contour and red_mask.any():
@@ -544,14 +544,14 @@ class KippenhahnCollector:
             )
             ax.contour(
                 x, y, both, levels=[0.2],
-                colors=infl_colour, linestyles=[(0, (2, 2))],
+                colors=dens_inv_colour, linestyles=[(0, (2, 2))],
                 linewidths=1.4, zorder=5.2,
             )
 
         # 7. Surface and core boundaries.  Use the same red dashed style as the
         # star boundaries in the heat maps.  Lift the surface line a little
         # above the true surface and draw it in the first (background) layer so
-        # it cannot hide the inflation and porosity-reduction outlines.
+        # it cannot hide the density_inversion and porosity-reduction outlines.
         surface_offset = SURFACE_OFFSET_FRAC * (
             float(y_lim[1]) - float(y_lim[0])
         )
@@ -588,7 +588,7 @@ class KippenhahnCollector:
             if np.any(burn_grid == i + 1)
         ]
         all_handles = (
-            burn_handles + inv_handles + infl_handles + red_handles + core_handles
+            burn_handles + inv_handles + dens_inv_handles + red_handles + core_handles
             + [
                 plt.Line2D(
                     [], [], color="red", linewidth=1.5, linestyle="--",
@@ -633,8 +633,8 @@ def _map_to_grid(m, values, y):
     return out
 
 
-def _density_inversion_mask(m, logrho, min_delta=INFLATION_MIN_DELTA,
-                            outer_q=INFLATION_OUTER_Q):
+def _density_inversion_mask(m, logrho, min_delta=DENSITY_INVERSION_MIN_DELTA,
+                            outer_q=DENSITY_INVERSION_OUTER_Q):
     """Return zones that belong to a significant outer density inversion.
 
     A density inversion is a contiguous run where ``logRho`` increases
@@ -642,7 +642,7 @@ def _density_inversion_mask(m, logrho, min_delta=INFLATION_MIN_DELTA,
     in the outer envelope (``m / m_surface >= outer_q``) with a total rise of
     at least ``min_delta`` dex are kept, so profile noise does not fill the
     diagram.  The surrounding zones must decrease again on both sides, which
-    selects the down-up-down pattern of an inflated layer.
+    selects the down-up-down pattern of a density-inverted layer.
     """
     m = np.asarray(m, dtype=float)
     logrho = np.asarray(logrho, dtype=float)
