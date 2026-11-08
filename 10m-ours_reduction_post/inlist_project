@@ -55,8 +55,8 @@
    ! when to stop
 
 
-    ! stop_at_phase_C_Burn = .true.
-    stop_at_phase_Si_Burn = .true.
+    stop_at_phase_C_Burn = .true.
+    ! stop_at_phase_Si_Burn = .true.
     ! stop_at_phase_WDCS = .true.
 
    !! stop when the star nears ZAMS (Lnuc/L > 0.99)
@@ -85,34 +85,6 @@
    use_Ledoux_criterion = .true.
    semiconvection_option = 'Langer_85 mixing; gradT = gradr'
    alpha_semiconvection = 1d-2
-
-   ! overshoot, as in test_suite/*_pre_ms_to_core_collapse
-   ! (the test suite comments the 0.345 value as "for M>10")
-   overshoot_scheme(1) = 'step'
-   overshoot_zone_type(1) = 'burn_H'
-   overshoot_zone_loc(1) = 'core'
-   overshoot_bdy_loc(1) = 'top'
-   overshoot_f(1) = 0.345
-   overshoot_f0(1) = 0.01
-
-   overshoot_scheme(2) = 'exponential'
-   overshoot_zone_type(2) = 'burn_He'
-   overshoot_zone_loc(2) = 'core'
-   overshoot_bdy_loc(2) = 'top'
-   overshoot_f(2) = 0.01
-   overshoot_f0(2) = 0.005
-
-   overshoot_scheme(3) = 'none'
-   overshoot_zone_type(3) = 'burn_He'
-   overshoot_zone_loc(3) = 'shell'
-   overshoot_bdy_loc(3) = 'bottom'
-
-   overshoot_scheme(4) = 'exponential'
-   overshoot_zone_type(4) = 'any'
-   overshoot_zone_loc(4) = 'any'
-   overshoot_bdy_loc(4) = 'any'
-   overshoot_f(4) = 0.005d0
-   overshoot_f0(4) = 0.001d0
 
    ! timesteps
     ! time_delta_coeff = 2
