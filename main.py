@@ -12,6 +12,7 @@ import evolution_graph
 import generic_last_log_plot
 import HEAT_MAP
 import hr_diagram_script
+import hr_mass_comparison
 import kippenhahn_plot
 import material_composition_plot
 from stream import stream_profiles
@@ -230,3 +231,13 @@ for mass, names in folders_for_graphs.items():
             print(f"    KIPPENHAHN({name}) failed: {e}")
 
     print("\n")
+
+# ----------------------------------------------------------------------
+# Cross-mass HR comparison for the "ours" models (30-100 M☉): one figure
+# for the pre-MS runs and one for the post-MS runs.
+# ----------------------------------------------------------------------
+print("Cross-mass HR comparison for the our models (30-100 M\u2609)")
+try:
+    hr_mass_comparison.plot_all()
+except Exception as e:
+    print(f"    hr_mass_comparison failed: {e}")

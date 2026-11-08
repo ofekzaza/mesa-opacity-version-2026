@@ -19,3 +19,4 @@ LOGS/
 watchdog.log
 archive.zip
 tmp/
+*.zip
