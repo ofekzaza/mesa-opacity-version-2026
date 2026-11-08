@@ -88,8 +88,8 @@ folders_for_graphs = {
     90: [
         "ours_reduction",
         "ours_reduction_post",
-        "supereduction_a=2_reduction",
-        "supereduction_a=2_reduction_post",
+        # "supereduction_a=2_reduction",
+        # "supereduction_a=2_reduction_post",
     ],
     100: [
         "ours_reduction",
