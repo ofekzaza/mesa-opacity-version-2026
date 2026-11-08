@@ -29,7 +29,6 @@ def draw_burning_reference_lines(ax, stages=("H", "He", "C", "O")):
         ax.axvline(
             log_t, color=color, linestyle="--", linewidth=1.1,
             alpha=0.85, zorder=1,
-            label=f"{stage} burning (log T ≈ {log_t:g}, log ρ ≈ {rho_lo:g}-{rho_hi:g})",
         )
 
 
@@ -142,7 +141,7 @@ def plot(mass: int, names: list[str], phase: str = "",
 
     if conv_plotted:
         plt.plot([], [], color="0.25", linewidth=3.2,
-                 label="Convection (thick line, conv_vel > 0)")
+                 label="Convection")
 
     ax = plt.gca()
     draw_instability_zones(ax)
@@ -154,6 +153,62 @@ def plot(mass: int, names: list[str], phase: str = "",
     if data_y_min is not None:
         pad_y = 0.05 * (data_y_max - data_y_min) or 0.5
         ax.set_ylim(data_y_min - pad_y, data_y_max + pad_y)
+
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    boundary_color = "#7f8c8d"
+    # Labels only when the corresponding line is visible
+    for stage in ("H", "He", "C", "O"):
+        log_t = BURNING_CONDITIONS[stage]["log_T"]
+        color = BURNING_CONDITIONS[stage]["color"]
+        if xlim[0] <= log_t <= xlim[1]:
+            ax.text(
+                log_t, 0.05, f"{stage} burn",
+                transform=ax.get_xaxis_transform(),
+                rotation=90, ha="right", va="bottom",
+                fontsize=8, color=color, alpha=0.9, zorder=6,
+            )
+    def _visible_point(f):
+        xs = np.linspace(xlim[0], xlim[1], 200)
+        ys = f(xs)
+        mask = (ys >= max(0.0, ylim[0])) & (ys <= ylim[1])
+        if not mask.any():
+            return None
+        idx = np.where(mask)[0]
+        # prefer the lower-left visible point
+        j = idx[np.argmin(xs[idx] + ys[idx])]
+        return float(xs[j]), float(ys[j])
+
+    # Place labels at the bottom of the graph, near where each line meets
+    # the lower boundary, to the right of the line.
+    y_bottom = ylim[0]
+    x_p = (y_bottom + 23.32) / 3.0
+    if xlim[0] <= x_p <= xlim[1]:
+        lx = min(max(x_p + 0.3, xlim[0] + 0.1), xlim[1] - 0.1)
+        ly = min(max(y_bottom + 0.1, ylim[0] + 0.1), ylim[1] - 0.1)
+        ax.text(lx, ly, r"$P_{\rm gas}=P_{\rm rad}$",
+                fontsize=8, color=boundary_color, alpha=0.85, zorder=6,
+                ha="left", va="bottom")
+    # Degeneracy label: place on the line at a visible point (lower-left),
+    # shifted right and slightly up, clamped to the frame.
+    xs = np.linspace(xlim[0], xlim[1], 200)
+    ys = 1.5 * xs - 8.25
+    mask = (ys >= ylim[0]) & (ys <= ylim[1])
+    if mask.any():
+        idx = np.where(mask)[0]
+        j = idx[np.argmin(xs[idx] + ys[idx])]
+        lx = min(max(xs[j] + 0.1, xlim[0] + 0.1), xlim[1] - 0.1)
+        ly = min(max(ys[j] + 1.2, ylim[0] + 0.1), ylim[1] - 0.1)
+        ax.text(lx, ly, "degeneracy", fontsize=8,
+                color=boundary_color, alpha=0.85, zorder=6,
+                ha="left", va="bottom")
+
+    # Relativistic label between H and He burn, above the relativistic line
+    rx = 0.5 * (BURNING_CONDITIONS["H"]["log_T"] + BURNING_CONDITIONS["He"]["log_T"])
+    ry = 6.2
+    if xlim[0] <= rx <= xlim[1] and ylim[0] <= ry <= ylim[1]:
+        ax.text(rx, ry, "relativistic", fontsize=8, color=boundary_color,
+                alpha=0.85, zorder=6, ha="center", va="bottom")
 
     plt.xlabel(r"$\log(T)$ [K]")
     plt.ylabel(r"$\log(\rho)$ [g/cm$^3$]")
