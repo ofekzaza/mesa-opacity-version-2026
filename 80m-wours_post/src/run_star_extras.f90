@@ -498,7 +498,7 @@
             ! depleted) so the fast Ne/O/Si phases leave traces in the logs.
             ! The photo cadence is deliberately left unchanged.
             if (.not. tight_logging_set) then
-               if (s% log_center_T > 8.5d0 .or. s% center_c12 < 0.15d0) then
+               if (s% log_center_temperature > 8.5d0 .or. s% center_c12 < 0.15d0) then
                   s% history_interval = 5
                   s% profile_interval = 5
                   tight_logging_set = .true.
