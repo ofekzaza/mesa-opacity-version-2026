@@ -66,10 +66,16 @@ def get_last_profile_num(logs_path: str) -> int:
         return int(prof_files[-1].split("profile")[-1].split(".data")[0])
 
 
-def get_line_kwargs(name: str, base_colors: dict) -> tuple[dict, bool, str]:
+def get_line_kwargs(name: str, base_colors: dict, drop_winds: bool = False,
+                    drop_post: bool = False) -> tuple[dict, bool, str]:
     plot_name = parse_name_for_plots(name)
     is_winds = "_reduction" in name
     base_name = name.replace("_reduction", "")
+
+    if drop_winds:
+        plot_name = plot_name.replace(" Winds", "").replace(" winds", "")
+    if drop_post:
+        plot_name = plot_name.replace(" Post", "").replace(" post", "")
 
     kwargs = {"label": plot_name, "linewidth": 0.8}
     if is_winds and base_name in base_colors:

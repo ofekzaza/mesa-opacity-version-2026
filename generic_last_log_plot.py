@@ -7,6 +7,7 @@ import numpy as np
 
 import utils
 
+
 def _convective_mask(prof):
     """True for zones where convection is active (conv_vel > 0)."""
     if not hasattr(prof, "conv_vel"):
@@ -27,12 +28,12 @@ def _plot_convective_segments(x, y, mask, color):
         plt.plot(x[s0:e0], y[s0:e0], color=color, linewidth=3.2, alpha=0.85, zorder=5)
     return len(starts) > 0
 
+
 y_axises = [
     "L_div_Ledd_effective",
     "log_L_div_Ledd",
     "log_opacity",
     "extra_opacity_factor",
-    "logT",
     "entropy",
 ]
 
@@ -81,6 +82,9 @@ def plot(
     # Load profiles if not pre-supplied
     profiles = _preloaded if _preloaded is not None else load_last_profiles(mass, names)
 
+    all_winds = all("_reduction" in n for n in names)
+    all_post = all(n.endswith("_post") for n in names)
+
     for name in names:
         prof = profiles.get(name)
         if prof is None:
@@ -96,7 +100,9 @@ def plot(
         x_data = getattr(prof, x_axis)
         y_data = getattr(prof, y_axis)
 
-        kwargs, is_winds, base_name = utils.get_line_kwargs(name, base_colors)
+        kwargs, is_winds, base_name = utils.get_line_kwargs(
+            name, base_colors, drop_winds=all_winds, drop_post=all_post
+        )
         (line,) = plt.plot(x_data, y_data, **kwargs)
         color = line.get_color()
         if not is_winds:

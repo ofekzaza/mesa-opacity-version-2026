@@ -14,6 +14,7 @@ import HEAT_MAP
 import hr_diagram_script
 import hr_mass_comparison
 import kippenhahn_plot
+import logT_logRho_plot
 import material_composition_plot
 import radius_time_plot
 from stream import stream_profiles
@@ -133,6 +134,9 @@ for mass, names in folders_for_graphs.items():
                 _preloaded=preloaded,
             )
             generic_last_log_plot.plot_generic_last_log_plot(
+                mass, phase_names, phase=phase, _preloaded=preloaded
+            )
+            logT_logRho_plot.plot(
                 mass, phase_names, phase=phase, _preloaded=preloaded
             )
         except Exception as e:
