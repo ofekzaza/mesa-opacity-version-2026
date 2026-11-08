@@ -37,6 +37,8 @@
       real, dimension(:), pointer :: extra_opacity_factor_memory_target => null()
 
 
+      logical :: tight_logging_set = .false.
+
       ! these routines are called by the standard run_star check_model
       contains
 
@@ -319,6 +321,17 @@
             call star_ptr(id, s, ierr)
             if (ierr /= 0) return
             extras_finish_step = keep_going
+
+            ! Tighten logging once C burning is deep (logT > 8.7) so the
+            ! fast Ne/O/Si phases (only a few years long) leave traces in the logs.
+            if (.not. tight_logging_set) then
+               if (s% log_center_T > 8.7d0) then
+                  s% history_interval = 5
+                  s% profile_interval = 5
+                  s% photo_interval = 100
+                  tight_logging_set = .true.
+               end if
+            end if
 
             ! to save a profile,
                ! s% need_to_save_profiles_now = .true.

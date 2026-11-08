@@ -13,6 +13,8 @@
 
    ! save a model at the end of the run
    save_model_when_terminate = .false.
+   write_profile_when_terminate = .true.
+   write_history_when_terminate = .true.
    save_model_filename = '15M_at_TAMS.mod'
 
    ! display on-screen plots
