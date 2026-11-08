@@ -5,6 +5,14 @@ the post-MS (``*_reduction_post``) runs.  Every mass is drawn as its own
 colour-coded evolutionary track (``log_Teff`` versus ``log_L``) with a matching
 legend entry, so the mass of each line is unambiguous.
 
+The empirical Humphreys-Davidson (HD) upper-luminosity limit is drawn on both
+figures for the metallicity of these models (solar, ``Z = 0.02``).  The
+classical Galactic limit is temperature-independent at
+``log(L/L_sun) = 5.8`` for ``log(Teff/K) <= 4.0`` and slopes up to
+``log(L/L_sun) ~ 6.8`` at ``log(Teff/K) = 4.6`` for the hot side
+(Humphreys & Davidson 1979, ApJ 232, 409; see also Woosley 2014 and
+Sabhahit et al. 2021, MNRAS 506, 1).
+
 Usage
 -----
     uv run hr_mass_comparison.py
@@ -46,6 +54,51 @@ MASS_COLOURS = {
     90: "#E377C2",   # pink
     100: "#17BECF",  # cyan
 }
+
+
+# ---------------------------------------------------------------------------
+# Humphreys-Davidson limit for solar metallicity (Z = Z_sun = 0.02).
+#
+# The empirical boundary has a temperature-independent (horizontal) part at
+# log(L/L_sun) = 5.8 for cool stars, and a sloping hot part that rises towards
+# the O-star luminosity limit.  We join the two at log(Teff/K) = 4.0 (the cool
+# edge quoted for the temperature-independent section, e.g. Sabhahit et al.
+# 2021) and reach log(L/L_sun) = 6.8 at log(Teff/K) = 4.6 (~40,000 K, the
+# maximum luminosity of O stars; Woosley 2014).
+#
+# These constants are kept here so the limit can easily be adjusted for a
+# different metallicity (e.g. log(L/L_sun) = 5.5 for the downward-revised
+# Magellanic/Galactic value of Davies et al. 2018 / Davies & Beasor 2020).
+# ---------------------------------------------------------------------------
+HD_LIMIT = {
+    "log_l": 5.8,          # horizontal (temperature-independent) part
+    "log_teff_knee": 4.0,  # where the horizontal part ends
+    "log_teff_hot": 4.6,   # hottest point of the sloping part
+    "log_l_hot": 6.8,      # upper luminosity reached at log_teff_hot
+}
+HD_LIMIT_COLOUR = "#222222"
+
+
+def hd_limit_curve(log_teff, hd=HD_LIMIT):
+    """Return ``log(L/L_sun)`` of the two-part HD limit at ``log_teff``.
+
+    ``log_teff`` may be a scalar or an array.  Cool stars sit on the
+    temperature-independent part; hotter stars follow the sloping segment and
+    the limit is capped at ``log_l_hot`` beyond ``log_teff_hot``.
+    """
+    log_teff = np.asarray(log_teff, dtype=float)
+    log_l = hd["log_l"]
+    knee = hd["log_teff_knee"]
+    hot = hd["log_teff_hot"]
+    log_l_hot = hd["log_l_hot"]
+
+    slope = (log_l_hot - log_l) / (hot - knee)
+    sloping = log_l + slope * (log_teff - knee)
+    return np.where(
+        log_teff <= knee,
+        log_l,
+        np.minimum(sloping, log_l_hot),
+    )
 
 
 def _mass_colour(mass, masses):
@@ -108,6 +161,22 @@ def plot_phase(phase: str, masses, out_dir: str = "") -> str | None:
         print(f"    HR comparison: nothing to plot for phase={phase}")
         return None
 
+    # Draw the empirical Humphreys-Davidson limit for solar metallicity.
+    # Span the full plotted temperature range (the x-axis is inverted later,
+    # which does not affect the data coordinates used here).
+    x_lo, x_hi = ax.get_xlim()
+    teff_grid = np.linspace(min(x_lo, x_hi), max(x_lo, x_hi), 512)
+    hd_line, = ax.plot(
+        teff_grid,
+        hd_limit_curve(teff_grid),
+        color=HD_LIMIT_COLOUR,
+        linewidth=2.2,
+        linestyle="--",
+        alpha=0.9,
+        zorder=6,
+        label=r"HD limit",
+    )
+
     ax.set_xlabel(r"$\log\,(T_{\mathrm{eff}}/\mathrm{K})$")
     ax.set_ylabel(r"$\log\,(L/L_\odot)$")
     ax.set_title(
@@ -118,9 +187,14 @@ def plot_phase(phase: str, masses, out_dir: str = "") -> str | None:
     # to the right.
     ax.invert_xaxis()
     ax.grid(True, which="major", alpha=0.25, linewidth=0.6)
-    ax.legend(
+    mass_legend = ax.legend(
         title=r"Mass", loc="best", fontsize=9, title_fontsize=9,
         framealpha=1.0, ncol=2,
+    )
+    ax.add_artist(mass_legend)
+    ax.legend(
+        handles=[hd_line], loc="lower left", bbox_to_anchor=(0.0, 0.045),
+        fontsize=8.5, framealpha=1.0,
     )
     ax.text(
         0.01, 0.01, "circles: first model    squares: last model",
