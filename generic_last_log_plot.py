@@ -35,6 +35,7 @@ y_axises = [
     "log_opacity",
     "extra_opacity_factor",
     "entropy",
+    "logR",
 ]
 
 
