@@ -13,10 +13,10 @@ from generic_last_log_plot import _convective_mask, _plot_convective_segments
 
 # Burning-stage reference data (kept here, not in the generic plot module).
 BURNING_CONDITIONS = {
-    "H": {"log_T": 7.1, "log_Rho": (1.0, 2.0), "color": "#1f77b4"},
-    "He": {"log_T": 8.0, "log_Rho": (2.0, 4.0), "color": "#2ca02c"},
-    "C": {"log_T": 8.8, "log_Rho": (4.5, 5.5), "color": "#ff7f0e"},
-    "O": {"log_T": 9.3, "log_Rho": (6.5, 7.5), "color": "#d62728"},
+    "H": {"log_T": 7.1, "log_Rho": (1.0, 2.0), "color": "#ffb3b3"},
+    "He": {"log_T": 8.0, "log_Rho": (2.0, 4.0), "color": "#ff6666"},
+    "C": {"log_T": 8.8, "log_Rho": (4.5, 5.5), "color": "#cc0000"},
+    "O": {"log_T": 9.3, "log_Rho": (6.5, 7.5), "color": "#800000"},
 }
 
 
@@ -197,7 +197,7 @@ def plot(mass: int, names: list[str], phase: str = "",
     if mask.any():
         idx = np.where(mask)[0]
         j = idx[np.argmin(xs[idx] + ys[idx])]
-        lx = min(max(xs[j] + 0.1, xlim[0] + 0.1), xlim[1] - 0.1)
+        lx = min(max(xs[j] - 0.25, xlim[0] + 0.1), xlim[1] - 0.1)
         ly = min(max(ys[j] + 1.2, ylim[0] + 0.1), ylim[1] - 0.1)
         ax.text(lx, ly, "degeneracy", fontsize=8,
                 color=boundary_color, alpha=0.85, zorder=6,
