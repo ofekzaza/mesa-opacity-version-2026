@@ -2,6 +2,7 @@ import glob
 import os
 import re
 import sys
+import utils
 
 import matplotlib.pyplot as plt
 import mesa_reader as mr
@@ -39,10 +40,7 @@ DIRS = [
 
 def scan_neg_profiles(log_dir):
     """Return list of (profile_num, model_number, neg_zones) for profiles with negative gradT."""
-    prof_files = sorted(
-        glob.glob(os.path.join(log_dir, 'profile*.data')),
-        key=lambda x: int(x.split('profile')[-1].split('.data')[0])
-    )
+    prof_files = utils.list_profiles(log_dir)
     results = []
     for fpath in prof_files:
         try:
@@ -55,7 +53,8 @@ def scan_neg_profiles(log_dir):
         neg_mask = gradt < 0
         if not neg_mask.any():
             continue
-        profile_num = int(os.path.basename(fpath).split('profile')[1].split('.data')[0])
+        base = os.path.basename(fpath).split('profile')[1].split('.data')[0]
+        profile_num = int(base) if base.isdigit() else 0
         zones = np.array(prof.zone, dtype=int)[neg_mask]
         model_number = int(prof.header('model_number'))
         results.append((profile_num, model_number, zones, fpath))

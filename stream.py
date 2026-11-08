@@ -1,21 +1,20 @@
 import os
 import mesa_reader as mr
+import utils
 
 
 def stream_profiles(logs_path: str, collectors: list) -> int:
     """Single streaming pass through all profile files.
 
-    Calls collector.consume(prof) on each profile in order.
+    Calls collector.consume(prof) on each profile in order (number ordering,
+    with ``profile_final.data`` appended last when it exists).
     Each MesaData object is discarded after the call — only the
     numpy arrays extracted by collectors remain in memory.
 
     Returns the number of profiles processed.
     """
     count = 0
-    for i in range(1, 9_999):
-        f_path = f"{logs_path}/profile{i}.data"
-        if not os.path.exists(f_path):
-            break
+    for f_path in utils.list_profiles(logs_path):
         try:
             prof = mr.MesaData(f_path)
         except Exception as e:

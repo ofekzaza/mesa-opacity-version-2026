@@ -299,10 +299,7 @@ def plot(mass: int, names: list[str], y_axis: str, phase: str = ""):
             plt.plot(x[0], y[0], "o", markersize=6, color=color)
             any_plotted = True
         else:
-            prof_files = sorted(
-                glob.glob(f"{path}/profile*.data"),
-                key=lambda x: int(x.split("profile")[-1].split(".data")[0]),
-            )
+            prof_files = utils.list_profiles(path)
             if not prof_files:
                 print(f"    evolution_graph({name}): no profiles found")
                 continue

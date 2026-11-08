@@ -50,8 +50,7 @@ def load_last_profiles(mass: int, names: list[str]) -> "dict[str, mr.MesaData | 
     for name in names:
         path = f"{mass}m-{name}/LOGS"
         try:
-            num = utils.get_last_profile_num(path)
-            loaded[name] = mr.MesaData(f"{path}/profile{num}.data")
+            loaded[name] = mr.MesaData(utils.get_last_profile_path(path))
         except Exception as e:
             print(f"    generic_last_log_plot: could not load last profile for {name}: {e}")
             loaded[name] = None

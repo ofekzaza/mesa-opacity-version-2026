@@ -230,8 +230,7 @@ def load_last_profile(mass: int, name: str) -> "mr.MesaData | None":
     """Load the last profile for a run exactly once."""
     path = f"{mass}m-{name}/LOGS"
     try:
-        num = utils.get_last_profile_num(path)
-        return mr.MesaData(f"{path}/profile{num}.data")
+        return mr.MesaData(utils.get_last_profile_path(path))
     except Exception as e:
         print(f"    material_composition: could not load last profile for {name}: {e}")
         return None

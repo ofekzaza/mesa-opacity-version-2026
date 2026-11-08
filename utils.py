@@ -58,12 +58,47 @@ def get_last_profile_num(logs_path: str) -> int:
         return _mr.MesaLogDir(logs_path).profile_numbers[-1]
     except Exception:
         prof_files = sorted(
-            _glob.glob(f"{logs_path}/profile*.data"),
+            (f for f in _glob.glob(f"{logs_path}/profile*.data")
+             if f.split("profile")[-1].split(".data")[0].isdigit()),
             key=lambda x: int(x.split("profile")[-1].split(".data")[0]),
         )
         if not prof_files:
             raise FileNotFoundError(f"No profiles found in {logs_path}")
         return int(prof_files[-1].split("profile")[-1].split(".data")[0])
+
+
+def get_last_profile_path(logs_path: str) -> str:
+    """Path of the best 'last' profile.
+
+    Prefers ``profile_final.data`` (the termination-time profile written when
+    ``write_profile_when_terminate`` is on); otherwise falls back to the
+    highest-numbered regular profile in the LOGS directory.
+    """
+    import os as _os
+    final = _os.path.join(logs_path, "profile_final.data")
+    if _os.path.isfile(final):
+        return final
+    num = get_last_profile_num(logs_path)
+    return _os.path.join(logs_path, f"profile{num}.data")
+
+
+def list_profiles(logs_path: str) -> list[str]:
+    """All saved profile paths, ascending by profile number.
+
+    ``profile_final.data`` (the termination-time profile) is appended last
+    when present, so full-profile streams also see the terminal state.
+    """
+    import glob as _glob
+    import os as _os
+    prof_files = sorted(
+        (f for f in _glob.glob(f"{logs_path}/profile*.data")
+         if f.split("profile")[-1].split(".data")[0].isdigit()),
+        key=lambda x: int(x.split("profile")[-1].split(".data")[0]),
+    )
+    final = _os.path.join(logs_path, "profile_final.data")
+    if _os.path.isfile(final):
+        prof_files.append(final)
+    return prof_files
 
 
 def get_line_kwargs(name: str, base_colors: dict, drop_winds: bool = False,
