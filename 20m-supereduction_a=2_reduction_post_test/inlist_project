@@ -18,7 +18,7 @@
    save_model_filename = '15M_at_TAMS.mod'
 
    ! display on-screen plots
-   pgstar_flag = .true.
+   pgstar_flag = .false.
 
 / ! end of star_job namelist
 

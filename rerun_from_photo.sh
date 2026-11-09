@@ -67,11 +67,19 @@ photo_count() {  # $1 = folder
     find "$1/photos" -maxdepth 1 -type f -size +0c 2>/dev/null | wc -l
 }
 
+prepare_restart_photo() {  # run inside the folder
+    latest=$(ls -t photos/* 2>/dev/null | head -1)
+    if [ -n "$latest" ]; then
+        rm -f restart_photo
+        cp -f "$latest" restart_photo
+    fi
+}
+
 echo "Starting rerun (mk + re) at $(date)" >> "$LOG_FILE"
 echo "Folders: ${#DIRS[@]}" >> "$LOG_FILE"
 
 for dir in "${DIRS[@]}"; do
-    if [ ! -d "$dir" ]; then
+    if [ ! -d "$BASE_DIR/$dir" ]; then
         echo "[SKIP] $dir not found" >> "$LOG_FILE"
         continue
     fi
@@ -80,16 +88,13 @@ for dir in "${DIRS[@]}"; do
     np=$(photo_count "$PWD")
     if [ "$np" -eq 0 ]; then
         echo "[SKIP] $dir has no non-empty photos -> cannot ./re" >> "$LOG_FILE"
+        cd "$BASE_DIR"
         continue
     fi
 
-    # Make sure restart_photo points at the newest photo
-    if [ ! -L restart_photo ] || [ ! -s restart_photo ]; then
-        latest=$(ls -t photos/* 2>/dev/null | head -1)
-        if [ -n "$latest" ]; then
-            ln -sf "$latest" restart_photo
-        fi
-    fi
+    # Point restart_photo at the newest photo (real copy, not a symlink:
+    # ./re chokes on a symlink pointing at the same file).
+    prepare_restart_photo
 
     echo "[RUN] $dir ./mk" >> "$LOG_FILE"
     START=$(date "+%Y-%m-%d %H:%M:%S")
@@ -99,6 +104,7 @@ for dir in "${DIRS[@]}"; do
     echo "  mk start=$START end=$END exit=$MK" >> "$LOG_FILE"
     if [ "$MK" -ne 0 ]; then
         echo "  SKIP ./re because ./mk failed (see $dir/mk.out)" >> "$LOG_FILE"
+        cd "$BASE_DIR"
         continue
     fi
 
@@ -108,15 +114,16 @@ for dir in "${DIRS[@]}"; do
     RE=$?
     END=$(date "+%Y-%m-%d %H:%M:%S")
     echo "  re start=$START end=$END exit=$RE (see $dir/re.out)" >> "$LOG_FILE"
+    cd "$BASE_DIR"
 done
 
 echo "" >> "$LOG_FILE"
 echo "=== photo verification ===" >> "$LOG_FILE"
 FAIL=0
 for dir in "${DIRS[@]}"; do
-    [ -d "$dir" ] || continue
-    np=$(photo_count "$dir")
-    if [ -L "$dir/restart_photo" ] && [ -s "$dir/restart_photo" ]; then
+    [ -d "$BASE_DIR/$dir" ] || continue
+    np=$(photo_count "$BASE_DIR/$dir")
+    if [ -f "$BASE_DIR/$dir/restart_photo" ] && [ -s "$BASE_DIR/$dir/restart_photo" ]; then
         rp=yes
     else
         rp=no
