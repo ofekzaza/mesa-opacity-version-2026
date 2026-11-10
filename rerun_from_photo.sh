@@ -114,9 +114,19 @@ for dir in "${DIRS[@]}"; do
         continue
     fi
 
-    # Point restart_photo at the newest photo (real copy, not a symlink:
-    # ./re chokes on a symlink pointing at the same file).
-    prepare_restart_photo
+    # Pick the newest photo by name (model number).  This is passed to
+    # ./re explicitly, because `re` chooses its own photo via `ls -tp`,
+    # which tie-breaks to the OLDEST numeric photo (1000) when all photos
+    # share one mtime.
+    PHOTO=$(ls photos/ 2>/dev/null | awk '/^[0-9]+$/ {n=$1+0; if (n>max) {max=n; name=$1}} END {print name}')
+    if [ -z "$PHOTO" ]; then
+        PHOTO=$(ls -t photos/* 2>/dev/null | head -1 | xargs basename)
+    fi
+    if [ -z "$PHOTO" ]; then
+        echo "[SKIP] $dir could not determine a photo to resume from" >> "$LOG_FILE"
+        cd "$BASE_DIR"
+        continue
+    fi
 
     echo "[RUN] $dir ./mk" >> "$LOG_FILE"
     START=$(date "+%Y-%m-%d %H:%M:%S")
@@ -130,9 +140,9 @@ for dir in "${DIRS[@]}"; do
         continue
     fi
 
-    echo "[RUN] $dir ./re (resume from last photo)" >> "$LOG_FILE"
+    echo "[RUN] $dir ./re $PHOTO (resume from last photo)" >> "$LOG_FILE"
     START=$(date "+%Y-%m-%d %H:%M:%S")
-    ./re > re.out 2>&1
+    ./re "$PHOTO" > re.out 2>&1
     RE=$?
     END=$(date "+%Y-%m-%d %H:%M:%S")
     echo "  re start=$START end=$END exit=$RE (see $dir/re.out)" >> "$LOG_FILE"
