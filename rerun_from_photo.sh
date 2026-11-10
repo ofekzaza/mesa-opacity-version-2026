@@ -58,8 +58,12 @@ DIRS=(
     100m-supereduction_a=2_reduction_post
 )
 
-# Optional single-folder mode
-if [ $# -gt 0 ]; then
+# Optional single-folder mode, or "continue from folder F" mode (pass
+# `--from F` to resume the full sequence starting at folder F).
+START_AT=""
+if [ $# -ge 2 ] && [ "$1" = "--from" ]; then
+    START_AT="$2"
+elif [ $# -gt 0 ]; then
     DIRS=("$1")
 fi
 
@@ -68,17 +72,35 @@ photo_count() {  # $1 = folder
 }
 
 prepare_restart_photo() {  # run inside the folder
-    latest=$(ls -t photos/* 2>/dev/null | head -1)
+    # Pick the photo with the largest numeric name (photo filenames are model
+    # numbers).  Fall back to the most recently modified file when there are
+    # no numeric ones.  (ls -t is unsafe here: old photos share one mtime,
+    # so it can return the *oldest* numeric photo, e.g. 1000.)
+    latest=$(ls photos/ 2>/dev/null | awk '/^[0-9]+$/ {n=$1+0; if (n>max) {max=n; name=$1}} END {print name}')
+    if [ -z "$latest" ]; then
+        latest=$(ls -t photos/* 2>/dev/null | head -1)
+    fi
     if [ -n "$latest" ]; then
         rm -f restart_photo
-        cp -f "$latest" restart_photo
+        cp -f "photos/$latest" restart_photo
     fi
 }
 
 echo "Starting rerun (mk + re) at $(date)" >> "$LOG_FILE"
 echo "Folders: ${#DIRS[@]}" >> "$LOG_FILE"
 
+skip_to=0
+[ -n "$START_AT" ] && skip_to=1
+
 for dir in "${DIRS[@]}"; do
+    if [ "$skip_to" = 1 ]; then
+        if [ "$dir" = "$START_AT" ]; then
+            skip_to=0
+        else
+            echo "[SKIP] $dir (before --from $START_AT)" >> "$LOG_FILE"
+            continue
+        fi
+    fi
     if [ ! -d "$BASE_DIR/$dir" ]; then
         echo "[SKIP] $dir not found" >> "$LOG_FILE"
         continue
