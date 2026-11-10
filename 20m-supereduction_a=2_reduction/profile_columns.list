@@ -50,7 +50,7 @@
    !dm_bar ! boundary mass (grams) average of adjacent dm's
    logdq ! log10(dq)
    !log_dq
-   dq_ratio ! dq(k-1)/dq(k)
+!   dq_ratio ! dq(k-1)/dq(k)
    q ! fraction of star mass interior to outer boundary of this zone
    !log_q ! log10(q)
    !xq
@@ -75,7 +75,7 @@
    !rho_times_r3 ! at face
    !log_rho_times_r3 ! at face
    !scale_height ! in Rsun units
-   pressure_scale_height ! in Rsun units
+!   pressure_scale_height ! in Rsun units
 
    !m_div_r ! gm/cm
    !dmbar_m_div_r
@@ -89,7 +89,7 @@
    
    !xm ! mass exterior to point (Msun units)
    !dq ! mass of zone as a fraction of total star mass
-   logxq ! log10(1-q)
+!   logxq ! log10(1-q)
    !logxm ! log10(xm)
    
    !xr ! radial distance from point to surface (Rsun)
@@ -116,7 +116,7 @@
 
    !acoustic_radius ! sound time from center to outer cell boundary (sec)
    !log_acoustic_radius ! log10(acoustic_radius) (sec)
-   acoustic_depth ! sound time from surface to outer cell boundary (sec)
+!   acoustic_depth ! sound time from surface to outer cell boundary (sec)
    !log_acoustic_depth ! log10(acoustic_depth) (sec)
    !acoustic_r_div_R_phot
 
@@ -168,7 +168,7 @@
    !chiT ! dlnP_dlnT at constant Rho
 
    csound ! sound speed
-   log_csound
+!   log_csound
    !csound_face ! sound speed (was previously called csound_at_face)
    !cs_at_cell_bdy ! sound speed at cell boundary (csound is at cell center)
    !v_div_cs ! velocity divided by sound speed
@@ -316,7 +316,23 @@
    z ! metallicity
    log_z ! metallicity
 
-   add_abundances ! this adds all of the isos that are in the current net
+   ! add_abundances replaced by explicit isotope list:
+   h1
+   he4
+   c12
+   n14
+   o16
+   ne20
+   mg24
+   si28
+   s32
+   ar36
+   ca40
+   ti44
+   cr48
+   fe52
+   co56
+   ni56
    ! NOTE: you can list specific isotopes by giving their names (from chem_def)
    !h1
    !he3
@@ -325,7 +341,7 @@
    !n14
    !o16
 
-   add_log_abundances ! this adds log10 of all of the isos that are in the current net
+!   add_log_abundances ! this adds log10 of all of the isos that are in the current net
    ! NOTE: you can list specific isotopes by giving their names (from chem_def)
    !log h1
    !log he3
@@ -359,7 +375,7 @@
 
 
 !# Opacity
-   opacity ! opacity measured at center of zone
+!    opacity ! opacity measured at center of zone
    log_opacity ! log10(opacity)
    !dkap_dlnrho_face ! partial derivative of opacity wrt. ln rho (at T=const) at outer edge of cell
       !  (was previously called dkap_dlnrho_at_face)
@@ -372,7 +388,7 @@
    !kap_frac_op_mono ! fraction of opacity from OP mono
 
    !log_kap
-   log_kap_times_factor
+!   log_kap_times_factor
 
    !log_c_div_tau
    !xtau
@@ -398,7 +414,7 @@
    lum_rad
 
    !log_L_div_CpTMdot
-   log_abs_lum_erg_s
+!   log_abs_lum_erg_s
 
    !L
    !Lc
@@ -446,10 +462,10 @@
    !alpha_mlt
 
    conv_vel ! convection velocity (cm/sec)
-   log_conv_vel ! log10 convection velocity (cm/sec)
+!   log_conv_vel ! log10 convection velocity (cm/sec)
 
-   conv_L_div_L
-   log_conv_L_div_L
+!   conv_L_div_L
+!   log_conv_L_div_L
    !lum_conv_div_lum_rad
    !lum_rad_div_L_Edd
    !lum_conv_div_lum_Edd
@@ -464,7 +480,7 @@
    !grad_temperature ! smoothed dlnT/dlnP at cell boundary
    !grad_density ! smoothed dlnRho/dlnP at cell boundary
    
-   !gradL ! gradient for Ledoux criterion for convection
+   gradL ! gradient for Ledoux criterion for convection
    !sch_stable ! 1 if grada > gradr, 0 otherwise
    !ledoux_stable ! 1 if gradL > gradr, 0 otherwise
 
@@ -478,7 +494,7 @@
 
    !log_gradT_div_gradr ! log10 gradT/gradr at cell boundary 
    !log_mlt_Gamma ! convective efficiency
-   conv_vel_div_csound ! convection velocity divided by sound speed
+!   conv_vel_div_csound ! convection velocity divided by sound speed
    !conv_vel_div_L_vel ! L_vel is velocity needed to carry L by convection; L = 4*pi*r^2*rho*vel**3
    log_mlt_D_mix ! log10 diffusion coefficient for mixing from mlt (cm^2/sec)
 
@@ -522,12 +538,12 @@
    log_D_semi ! D_mix for regions where mix_type = semiconvective_mixing
    log_D_ovr ! D_mix for regions where mix_type = overshoot_mixing
    log_D_thrm ! D_mix for regions where mix_type = thermohaline_mixing
-   log_D_minimum ! D_mix for regions where mix_type = minimum_mixing
-   log_D_rayleigh_taylor ! D_mix for regions where mix_type = rayleigh_taylor_mixing
+!   log_D_minimum ! D_mix for regions where mix_type = minimum_mixing
+!   log_D_rayleigh_taylor ! D_mix for regions where mix_type = rayleigh_taylor_mixing
    !log_D_anon ! D_mix for regions where mix_type = anonymous_mixing
-   log_D_omega
+!   log_D_omega
 
-   log_sig_mix ! sig(k) is mixing flow across face k in (gm sec^1)
+!   log_sig_mix ! sig(k) is mixing flow across face k in (gm sec^1)
          ! sig(k) = D_mix*(4*pi*r(k)**2*rho_face)**2/dmavg
    
    !dominant_isoA_for_thermohaline
@@ -550,34 +566,34 @@
 
 
 !# Rotation
-   omega ! angular velocity = j_rot/i_rot
-   log_omega
-   log_j_rot
-   log_J_div_M53 ! J is j*1e-15 integrated from center; M53 is m^(5/3)
-   log_J_inside ! J_inside is j_rot integrated from center
+!   omega ! angular velocity = j_rot/i_rot
+!   log_omega
+!   log_j_rot
+!   log_J_div_M53 ! J is j*1e-15 integrated from center; M53 is m^(5/3)
+!   log_J_inside ! J_inside is j_rot integrated from center
    !shear ! -dlnomega/dlnR
-   log_abs_shear ! log10(abs(dlnomega/dlnR))
+!   log_abs_shear ! log10(abs(dlnomega/dlnR))
    !richardson_number
-   i_rot ! specific moment of inertia at cell boundary
-   j_rot ! specific angular momentum at cell boundary
-   v_rot ! rotation velocity at cell boundary (km/sec)
+!   i_rot ! specific moment of inertia at cell boundary
+!   j_rot ! specific angular momentum at cell boundary
+!   v_rot ! rotation velocity at cell boundary (km/sec)
    !w_div_w_crit_roche !ratio of rotational velocity to keplerian at the equator
                        !without the contribution from the Eddington factor
-   fp_rot ! rotation factor for pressure
-   ft_rot ! rotation factor for temperature
+!   fp_rot ! rotation factor for pressure
+!   ft_rot ! rotation factor for temperature
    !ft_rot_div_fp_rot ! gradr factor
       
    !log_am_nu_non_rot ! log10(am_nu_non_rot)
    !log_am_nu_rot ! log10(am_nu_rot)
-   log_am_nu ! log10(am_nu_non_rot + am_nu_rot)
+!   log_am_nu ! log10(am_nu_non_rot + am_nu_rot)
       
-   r_polar ! (Rsun)
-   log_r_polar ! log10 (Rsun)
-   r_equatorial ! (Rsun)
-   log_r_equatorial ! log10 (Rsun)
-   r_e_div_r_p ! equatorial/r_polar
-   omega_crit ! breakup angular velocity = sqrt(G M / equatorial^3)
-   omega_div_omega_crit
+!   r_polar ! (Rsun)
+!   log_r_polar ! log10 (Rsun)
+!   r_equatorial ! (Rsun)
+!   log_r_equatorial ! log10 (Rsun)
+!   r_e_div_r_p ! equatorial/r_polar
+!   omega_crit ! breakup angular velocity = sqrt(G M / equatorial^3)
+!   omega_div_omega_crit
       
    !am_log_nu_omega ! for diffusion of omega
    !am_log_nu_j ! for diffusion of angular momentum
@@ -587,19 +603,19 @@
       
    !am_log_sig_omega ! for diffusion of omega
    !am_log_sig_j ! for diffusion of angular momentum
-   am_log_sig ! == am_log_sig_omega
+!   am_log_sig ! == am_log_sig_omega
       
    !am_log_D_visc ! diffusion coeff for kinematic viscosity      
-   am_log_D_DSI ! diffusion coeff for dynamical shear instability      
-   am_log_D_SH ! diffusion coeff for Solberg-Hoiland instability      
-   am_log_D_SSI ! diffusion coeff for secular shear instability
-   am_log_D_ES ! diffusion coeff for Eddington-Sweet circulation
-   am_log_D_GSF ! diffusion coeff for Goldreich-Schubert-Fricke instability
-   am_log_D_ST ! Spruit dynamo mixing diffusivity
-   am_log_nu_ST ! Spruit dynamo effective viscosity
+!   am_log_D_DSI ! diffusion coeff for dynamical shear instability      
+!   am_log_D_SH ! diffusion coeff for Solberg-Hoiland instability      
+!   am_log_D_SSI ! diffusion coeff for secular shear instability
+!   am_log_D_ES ! diffusion coeff for Eddington-Sweet circulation
+!   am_log_D_GSF ! diffusion coeff for Goldreich-Schubert-Fricke instability
+!   am_log_D_ST ! Spruit dynamo mixing diffusivity
+!   am_log_nu_ST ! Spruit dynamo effective viscosity
       
-   dynamo_log_B_r ! (Gauss)
-   dynamo_log_B_phi ! (Gauss)
+!   dynamo_log_B_r ! (Gauss)
+!   dynamo_log_B_phi ! (Gauss)
 
    !am_domega_dlnR
    !log_abs_dlnR_domega
@@ -737,25 +753,25 @@
 
 !# RTI
 
-   RTI_du_diffusion_kick
-   alpha_RTI
-   boost_for_eta_RTI
-   dedt_RTI
-   dudt_RTI
-   eta_RTI
-   log_alpha_RTI
+!   RTI_du_diffusion_kick
+!   alpha_RTI
+!   boost_for_eta_RTI
+!   dedt_RTI
+!   dudt_RTI
+!   eta_RTI
+!   log_alpha_RTI
    !log_boost_for_eta_RTI
-   log_eta_RTI
+!   log_eta_RTI
    !log_etamid_RTI
-   log_lambda_RTI_div_Hrho
-   log_sig_RTI
+!   log_lambda_RTI_div_Hrho
+!   log_sig_RTI
    !log_sigmid_RTI
    !log_source_RTI
-   log_source_minus_alpha_RTI
-   log_source_plus_alpha_RTI
+!   log_source_minus_alpha_RTI
+!   log_source_plus_alpha_RTI
    !source_minus_alpha_RTI
    !source_plus_alpha_RTI
-   lambda_RTI
+!   lambda_RTI
 
 !# Hydrodynamics
 
@@ -847,9 +863,9 @@
    !delta_eps_nuc ! eps_nuc - eps_nuc_start, change during step
    !delta_mu ! mu - mu_start, change during step
    
-   zFe ! mass fraction of "Fe" = Fe+Co+Ni
+!   zFe ! mass fraction of "Fe" = Fe+Co+Ni
    !log_zFe
-   dPdr_dRhodr_info
+!   dPdr_dRhodr_info
    !log_sig_raw_mix
 
    !d_u_div_rmid
@@ -862,10 +878,10 @@
    !dlnRho_dr
    !dlnX_dr
    !dlnY_dr
-   dlogR
+!   dlogR
    !dPdr_div_grav
-   dPdr_info
-   dRhodr_info
+!   dPdr_info
+!   dRhodr_info
    !dRstar_div_dr
    !dr_ratio
    !dm_eps_grav

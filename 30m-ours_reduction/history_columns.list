@@ -249,7 +249,7 @@
       !log_extra_L ! log10 extra_L
 
    !## neutrino losses
-      !log_Lneu ! log10 power emitted in neutrinos, nuclear and thermal (in Lsun units)
+   log_Lneu ! log10 power emitted in neutrinos, nuclear and thermal (in Lsun units)
       !log_Lneu_nuc ! log10 power emitted in neutrinos, nuclear sources only (in Lsun units)
       !log_Lneu_nonnuc ! log10 power emitted in neutrinos, thermal sources only (in Lsun units)
 
@@ -602,7 +602,7 @@
       !center_eps_nuc
       !d_center_eps_nuc_dlnT
       !d_center_eps_nuc_dlnd
-      !log_center_eps_nuc
+   log_center_eps_nuc ! log10 central eps_nuc (erg/g/s)
 
       center_entropy ! in units of kerg per baryon
       !max_entropy ! in units of kerg per baryon
@@ -638,6 +638,9 @@
       center he4
       center c12
       center o16
+   center ne20
+   center si28
+   center fe56
 
       ! individual log10 central mass fractions (as many as desired)
       !log_center h1
@@ -924,8 +927,7 @@
       !min_Pgas_div_P
       !surf_c12_minus_o16 ! this is useful for seeing effects of dredge up on AGB
       !surf_num_c12_div_num_o16
-
-      !phase_of_evolution ! Integer mapping to the type of evolution see star_data/public/star_data_def.inc for definitions
+      phase_of_evolution ! Integer mapping to the type of evolution see star_data/public/star_data_def.inc for definitions
 
    !## MLT++
       !gradT_excess_alpha
