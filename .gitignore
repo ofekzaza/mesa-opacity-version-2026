@@ -20,3 +20,4 @@ watchdog.log
 archive.zip
 tmp/
 *.zip
+**/profile_final.data
