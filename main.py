@@ -102,6 +102,28 @@ folders_for_graphs = {
     ],
 }
 
+# ----------------------------------------------------------------------
+# Cross-mass HR comparison for the "ours" models (30-100 M☉): one figure
+# for the pre-MS runs and one for the post-MS runs.
+# ----------------------------------------------------------------------
+print("Cross-mass HR comparison for the our models (30-100 M\u2609)")
+try:
+    hr_mass_comparison.plot_all()
+except Exception as e:
+    print(f"    hr_mass_comparison failed: {e}")
+
+# ----------------------------------------------------------------------
+# Cross-mass radius-versus-time comparison for the "ours" models
+# (30-100 M☉): one figure for the pre-MS runs and one for the post-MS runs.
+# ----------------------------------------------------------------------
+print("Cross-mass radius-time comparison for the our models (30-100 M\u2609)")
+try:
+    radius_time_plot.plot_all()
+except Exception as e:
+    print(f"    radius_time_plot failed: {e}")
+
+
+
 for mass, names in folders_for_graphs.items():
     print("\n")
     print(f"start graphs for {mass}M\u2609 folders")
@@ -237,22 +259,3 @@ for mass, names in folders_for_graphs.items():
 
     print("\n")
 
-# ----------------------------------------------------------------------
-# Cross-mass HR comparison for the "ours" models (30-100 M☉): one figure
-# for the pre-MS runs and one for the post-MS runs.
-# ----------------------------------------------------------------------
-print("Cross-mass HR comparison for the our models (30-100 M\u2609)")
-try:
-    hr_mass_comparison.plot_all()
-except Exception as e:
-    print(f"    hr_mass_comparison failed: {e}")
-
-# ----------------------------------------------------------------------
-# Cross-mass radius-versus-time comparison for the "ours" models
-# (30-100 M☉): one figure for the pre-MS runs and one for the post-MS runs.
-# ----------------------------------------------------------------------
-print("Cross-mass radius-time comparison for the our models (30-100 M\u2609)")
-try:
-    radius_time_plot.plot_all()
-except Exception as e:
-    print(f"    radius_time_plot failed: {e}")
