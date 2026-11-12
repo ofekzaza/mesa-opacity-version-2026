@@ -31,6 +31,10 @@
    change_net = .true.
    new_net_name = 'approx21_cr60_plus_co56.net'
 
+   ! official termination code string for the log_max_temp_upper_limit
+   ! backstop (this is a star_job namelist variable)
+   required_termination_code_string = 'log_max_temp_upper_limit'
+
 / ! end of star_job namelist
 
 
@@ -64,7 +68,6 @@
    ! missed hook can never run away into collapse; fe_core_infall_limit is
    ! the physical Fe-core safeguard.
    log_max_temp_upper_limit = 9.7d0
-   required_termination_code_string = 'log_max_temp_upper_limit'
    fe_core_infall_limit = 3d7
    xa_central_upper_limit_species(1) = 'fe56'
    xa_central_upper_limit(1) = 0.5
