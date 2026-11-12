@@ -7,6 +7,10 @@ LOG_FILE="$(pwd)/run_log.txt"
 echo "Starting run at $(date)" >> "$LOG_FILE"
 
 DIRS=(
+    100m-ours_reduction
+    100m-ours_reduction_post
+    100m-supereduction_a=2_reduction
+    100m-supereduction_a=2_reduction_post
     10m-ours_reduction
     10m-ours_reduction_post
     10m-supereduction_a=2_reduction
@@ -15,14 +19,14 @@ DIRS=(
     20m-ours_reduction_post
     20m-supereduction_a=2_reduction
     20m-supereduction_a=2_reduction_post
+    30m-mlt++_reduction
+    30m-mlt++_reduction_post
+    30m-normal_reduction
+    30m-normal_reduction_post
     30m-ours_reduction
     30m-ours_reduction_post
     30m-supereduction_a=2_reduction
     30m-supereduction_a=2_reduction_post
-    30m-normal_reduction
-    30m-normal_reduction_post
-    30m-mlt++_reduction
-    30m-mlt++_reduction_post
     40m-ours_reduction
     40m-ours_reduction_post
     40m-supereduction_a=2_reduction
@@ -47,11 +51,15 @@ DIRS=(
     90m-ours_reduction_post
     90m-supereduction_a=2_reduction
     90m-supereduction_a=2_reduction_post
-    100m-ours_reduction
-    100m-ours_reduction_post
-    100m-supereduction_a=2_reduction
-    100m-supereduction_a=2_reduction_post
-    300m-ours_reduction
+    30m-mlt++_reduction_default
+    30m-mlt++_reduction_post_default
+    30m-normal_reduction_default
+    30m-normal_reduction_post_default
+    30m-ours_reduction_default
+    30m-ours_reduction_post_default
+    30m-supereduction_a=2_reduction_default
+    30m-supereduction_a=2_reduction_post_default
+    20m-ours_reduction_suite
 )
 
 for dir in "${DIRS[@]}"; do

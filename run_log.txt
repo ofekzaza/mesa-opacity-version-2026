@@ -223,3 +223,10 @@ Running ./mk...
 Folder: 100m-supereduction_a=2_reduction_post, Command: ./mk, Start: 2026-07-24 12:29:44, End: 2026-07-24 12:29:46, TotalTime: 00:00:02, ExitCode: 0
 Running ./rn...
 Folder: 100m-supereduction_a=2_reduction_post, Command: ./rn, Start: 2026-07-24 12:29:46, End: 2026-07-24 16:13:04, TotalTime: 03:43:18, ExitCode: 0, TermCode: min_timestep_limit
+
+
+
+
+
+
+# again

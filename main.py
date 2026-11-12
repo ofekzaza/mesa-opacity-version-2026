@@ -23,6 +23,10 @@ from stream import stream_profiles
 def _get_phase(name: str) -> str:
     if name.endswith("_post"):
         return "post_ms"
+    elif name.endswith("_suite"):
+        return "suite"
+    elif name.endswith("_default"):
+        return "default"
     elif name.endswith("_reduction"):
         return "pre_ms"
     return ""
@@ -44,6 +48,7 @@ folders_for_graphs = {
         "ours_reduction_post",
         "supereduction_a=2_reduction",
         "supereduction_a=2_reduction_post",
+        "ours_reduction_suite",
     ],
     30: [
         "ours_reduction",
@@ -54,6 +59,14 @@ folders_for_graphs = {
         "mlt++_reduction_post",
         "normal_reduction",
         "normal_reduction_post",
+        "ours_reduction_default",
+        "ours_reduction_post_default",
+        "supereduction_a=2_reduction_default",
+        "supereduction_a=2_reduction_post_default",
+        "mlt++_reduction_default",
+        "mlt++_reduction_post_default",
+        "normal_reduction_default",
+        "normal_reduction_post_default",
     ],
     40: [
         "ours_reduction",

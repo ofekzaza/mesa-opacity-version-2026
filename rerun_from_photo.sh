@@ -12,22 +12,35 @@ LOG_FILE="$BASE_DIR/rerun_from_photo_log.txt"
 : > "$LOG_FILE"
 
 DIRS=(
+
     10m-ours_reduction
     10m-ours_reduction_post
     10m-supereduction_a=2_reduction
     10m-supereduction_a=2_reduction_post
+    30m-mlt++_reduction_default
+    30m-mlt++_reduction_post_default
+    30m-normal_reduction_default
+    30m-normal_reduction_post_default
+    30m-ours_reduction_default
+    30m-ours_reduction_post_default
+    30m-supereduction_a=2_reduction_default
+    30m-supereduction_a=2_reduction_post_default
     20m-ours_reduction
     20m-ours_reduction_post
     20m-supereduction_a=2_reduction
     20m-supereduction_a=2_reduction_post
+    30m-mlt++_reduction
+    30m-mlt++_reduction_post
+    30m-normal_reduction
+    30m-normal_reduction_post
     30m-ours_reduction
     30m-ours_reduction_post
     30m-supereduction_a=2_reduction
     30m-supereduction_a=2_reduction_post
-    30m-normal_reduction
-    30m-normal_reduction_post
-    30m-mlt++_reduction
-    30m-mlt++_reduction_post
+    100m-ours_reduction
+    100m-ours_reduction_post
+    100m-supereduction_a=2_reduction
+    100m-supereduction_a=2_reduction_post
     40m-ours_reduction
     40m-ours_reduction_post
     40m-supereduction_a=2_reduction
@@ -52,10 +65,7 @@ DIRS=(
     90m-ours_reduction_post
     90m-supereduction_a=2_reduction
     90m-supereduction_a=2_reduction_post
-    100m-ours_reduction
-    100m-ours_reduction_post
-    100m-supereduction_a=2_reduction
-    100m-supereduction_a=2_reduction_post
+    20m-ours_reduction_suite
 )
 
 # Optional single-folder mode, or "continue from folder F" mode (pass
