@@ -59,7 +59,23 @@
     min_D_mix = 1d-2
     limit_for_rel_error_in_energy_conservation = 1d-3
     hard_limit_for_rel_error_in_energy_conservation = 1d-2
-    max_number_retries = 37
+
+    ! Solver robustness.  The official 12M test-suite leaves max_number_retries
+    ! unset (= -1, unlimited).  A hard cap of 37 killed the first suite run at
+    ! model 4703 (hydro_failed, "termination code: max_number_retries") even
+    ! though the max residual was barely over tolerance (3.3e-4 vs 1e-4).
+    ! Remedies: unlimited retries + more Newton iterations per solve.
+    max_number_retries = -1
+    solver_max_tries_before_reject = 100
+    max_tries_for_retry = 50
+    max_tries_after_5_retries = 50
+
+    ! If this run later stalls at the known O-burn timestep wall
+    ! (logT_center ~ 9.1-9.3, min_timestep_limit) with the auto-extended
+    ! approx21 net, restart from the last photo with:
+    !   change_net = .true.
+    !   new_net_name = 'approx21_cr60_plus_co56.net'
+
     max_num_profile_models = 9999
     history_interval = 50
     profile_interval = 50
