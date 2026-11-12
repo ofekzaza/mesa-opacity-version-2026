@@ -1,40 +1,46 @@
-! inlist to evolve a 15 solar mass star
-
-! For the sake of future readers of this file (yourself included),
-! ONLY include the controls you are actually using.  DO NOT include
-! all of the other controls that simply have their default values.
+! 20m-ours_reduction_suite — minimal proof-of-concept.
+!
+! Purpose: prove that the "ours" porosity-reduction model can reach
+! Si interactions and Fe-core formation (the logT_center > 9.6 stop in
+! src/run_star_extras.f90).  This is the plain project base config
+! (20m-ours_reduction) + the large-from-start network + solver robustness.
+! Mixing follows the physical recipe of MESA's own 12M test-suite
+! (12M_pre_ms_to_core_collapse/inlist_common): Ledoux + semiconvection +
+! TDC MLT.  The test-suite's large overshoot block is intentionally omitted
+! for simplicity; add it back if you want the full 12M recipe.
+!
+! Kept minimal: only controls that differ from MESA defaults are listed
+! (plus the explicitly restored Ledoux/TDC/gold-tolerance lines).
 
 &star_job
-
-   ! see star/defaults/star_job.defaults
 
    ! begin with a pre-main sequence model
    create_pre_main_sequence_model = .true.
 
-   ! save a model at the end of the run
+   ! save the final model (Si burn / Fe-core) + a final profile
    save_model_when_terminate = .false.
    write_profile_when_terminate = .true.
    filename_for_profile_when_terminate = 'profile_final.data'
-   save_model_filename = '15M_at_TAMS.mod'
 
    ! display on-screen plots
    pgstar_flag = .false.
+
+   ! large network from the start — approx21 neglects electron captures
+   ! before the end of O burn (Laplace+ 2021), so use the +Co56 net to
+   ! make it through O/Si to the Fe core.
+   change_net = .true.
+   new_net_name = 'approx21_cr60_plus_co56.net'
 
 / ! end of star_job namelist
 
 
 &eos
 
-   ! eos options
-   ! see eos/defaults/eos.defaults
-
 / ! end of eos namelist
 
 
 &kap
 
-   ! kap options
-   ! see kap/defaults/kap.defaults
    use_Type2_opacities = .true.
    Zbase = 0.02
 
@@ -43,154 +49,56 @@
 
 &controls
 
-   ! see star/defaults/controls.defaults
-    terminal_interval = 1000
-    ! Primary stop: Si burning well underway (logT_center > 9.6), enforced in
-    ! src/run_star_extras.f90 (extras_check_model).
-    ! Fe-core safeguard + guardrails:
-    fe_core_infall_limit = 3d7
-    xa_central_upper_limit_species(1) = 'fe56'
-    xa_central_upper_limit(1) = 0.5
-    max_age = 1d9
-    max_model_number = 200000
-    ! robustness controls for late O/Si burning (as in
-    ! test_suite/*_pre_ms_to_core_collapse)
-    set_min_D_mix = .true.
-    min_D_mix = 1d-2
-    limit_for_rel_error_in_energy_conservation = 1d-3
-    hard_limit_for_rel_error_in_energy_conservation = 1d-2
-
-    ! Solver robustness.  The official 12M test-suite leaves max_number_retries
-    ! unset (= -1, unlimited).  A hard cap of 37 killed the first suite run at
-    ! model 4703 (hydro_failed, "termination code: max_number_retries") even
-    ! though the max residual was barely over tolerance (3.3e-4 vs 1e-4).
-    ! Remedies: unlimited retries + more Newton iterations per solve.
-    max_number_retries = -1
-    solver_max_tries_before_reject = 100
-    max_tries_for_retry = 50
-    max_tries_after_5_retries = 50
-
-    ! If this run later stalls at the known O-burn timestep wall
-    ! (logT_center ~ 9.1-9.3, min_timestep_limit) with the auto-extended
-    ! approx21 net, restart from the last photo with:
-    !   change_net = .true.
-    !   new_net_name = 'approx21_cr60_plus_co56.net'
-
-    max_num_profile_models = 9999
-    history_interval = 50
-    profile_interval = 50
-    photo_interval = 1000
+   terminal_interval = 1000
+   history_interval = 50
+   profile_interval = 50
+   photo_interval = 1000
+   max_num_profile_models = 9999
 
    ! starting specifications
    initial_mass = 20 ! in Msun units
    initial_z = 0.02
 
-   ! when to stop
+   ! stops: primary Si-burn stop lives in run_star_extras.f90
+   ! (logT_center > 9.6).  Official backstop just above it (9.7) so a
+   ! missed hook can never run away into collapse; fe_core_infall_limit is
+   ! the physical Fe-core safeguard.
+   log_max_temp_upper_limit = 9.7d0
+   required_termination_code_string = 'log_max_temp_upper_limit'
+   fe_core_infall_limit = 3d7
+   xa_central_upper_limit_species(1) = 'fe56'
+   xa_central_upper_limit(1) = 0.5
+   max_age = 1d9
+   max_model_number = 200000
 
+   ! late-burning robustness (as in test_suite/*_pre_ms_to_core_collapse)
+   set_min_D_mix = .true.
+   min_D_mix = 1d-2
+   limit_for_rel_error_in_energy_conservation = 1d-3
+   hard_limit_for_rel_error_in_energy_conservation = 1d-2
 
-    ! stop_at_phase_C_Burn = .true.
-! stop_at_phase_Si_Burn = .true.  ! replaced by logT>9.6 stop
-    ! stop_at_phase_WDCS = .true.
+   ! solver robustness: unlimited retries (default -1) + more Newton
+   ! iterations per solve.  A hard retry cap previously killed the run.
+   max_number_retries = -1
+   solver_max_tries_before_reject = 100
+   max_tries_for_retry = 50
+   max_tries_after_5_retries = 50
 
-   !! stop when the star nears ZAMS (Lnuc/L > 0.99)
-   !Lnuc_div_L_zams_limit = 0.99d0
-   !stop_near_zams = .true.
+   ! mixing: Ledoux + semiconvection, as in MESA's 12M test-suite recipe
+   ! (12M_pre_ms_to_core_collapse/inlist_common).  Physically appropriate for
+   ! a 20 M☉ star: the stabilizing composition gradient matters in core-He
+   ! burning and sets the C/O-core mass that ultimately reaches Si/Fe core.
+   use_Ledoux_criterion = .true.
+   semiconvection_option = 'Langer_85 mixing; gradT = gradr'
+   alpha_semiconvection = 1d-2
 
-   !! stop when the center mass fraction of h1 drops below this limit
-   !xa_central_lower_limit_species(1) = 'h1'
-   !xa_central_lower_limit(1) = 1d-3
+   ! solver / energy options (explicit; these are also MESA defaults)
+   MLT_option = 'TDC'
+   use_gold_tolerances = .true.
+   energy_eqn_option = 'dedt'
 
    ! wind
-
    hot_wind_scheme = 'Dutch'
-   Dutch_scaling_factor = 0.66 
-
-   ! atmosphere
-
-   ! rotation
-
-   ! element diffusion
-
-   ! mlt
-
-   ! mixing
-    ! Ledoux + semiconvection, as in test_suite/*_pre_ms_to_core_collapse
-    use_Ledoux_criterion = .true.
-    semiconvection_option = 'Langer_85 mixing; gradT = gradr'
-    alpha_semiconvection = 1d-2
-
-    ! overshoot, as in test_suite/*_pre_ms_to_core_collapse
-    ! (the test suite comments the 0.345 value as "for M>10")
-    overshoot_scheme(1) = 'step'
-    overshoot_zone_type(1) = 'burn_H'
-    overshoot_zone_loc(1) = 'core'
-    overshoot_bdy_loc(1) = 'top'
-    overshoot_f(1) = 0.345
-    overshoot_f0(1) = 0.01
-
-    overshoot_scheme(2) = 'exponential'
-    overshoot_zone_type(2) = 'burn_He'
-    overshoot_zone_loc(2) = 'core'
-    overshoot_bdy_loc(2) = 'top'
-    overshoot_f(2) = 0.01
-    overshoot_f0(2) = 0.005
-
-    overshoot_scheme(3) = 'none'
-    overshoot_zone_type(3) = 'burn_He'
-    overshoot_zone_loc(3) = 'shell'
-    overshoot_bdy_loc(3) = 'bottom'
-
-    overshoot_scheme(4) = 'exponential'
-    overshoot_zone_type(4) = 'any'
-    overshoot_zone_loc(4) = 'any'
-    overshoot_bdy_loc(4) = 'any'
-    overshoot_f(4) = 0.005d0
-    overshoot_f0(4) = 0.001d0
-
-   ! timesteps
-    ! time_delta_coeff = 2
-    time_delta_coeff = 0.5
-
-    ! 1d-3
-    varcontrol_target   = 1d-4
-    timestep_factor_for_retries = 0.75
-
-   ! mesh
-
-   ! solver
-   ! options for energy conservation (see MESA V, Section 3)
-   energy_eqn_option = 'dedt'
-   use_gold_tolerances = .true.
-
-
-   MLT_option = 'TDC'
-   okay_to_reduce_gradT_excess = .false.
-
-   ! output
-   
-    ! mlt++
-    ! MLT_option = 'TDC'
-    ! okay_to_reduce_gradT_excess = .true.
-    ! gradT_excess_max_change = 0.01d0
-
-  ! superad a = 2
-    ! MLT_option = 'TDC'
-    ! use_superad_reduction = .true.
-    ! superad_reduction_Gamma_limit = 0.5d0
-    ! superad_reduction_Gamma_limit_scale = 2d0
-    ! superad_reduction_Gamma_inv_scale = 2d0
-    ! superad_reduction_diff_grads_limit = 1d-2 ! this is lowered to 1d-2 in the first 100 steps in run_star_extras
-    ! superad_reduction_limit = -1d0
-
-
-  ! superad a = 5
-    ! MLT_option = 'TDC'
-    ! use_superad_reduction = .true.
-    ! superad_reduction_Gamma_limit = 0.5d0
-    ! superad_reduction_Gamma_limit_scale = 5d0
-    ! superad_reduction_Gamma_inv_scale = 5d0
-    ! superad_reduction_diff_grads_limit = 1d-2 ! this is lowered to 1d-2 in the first 100 steps in run_star_extras
-    ! superad_reduction_limit = -1d0
-
+   Dutch_scaling_factor = 0.66
 
 / ! end of controls namelist
