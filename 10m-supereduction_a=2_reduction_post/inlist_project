@@ -49,8 +49,8 @@
 
    ! see star/defaults/controls.defaults
     terminal_interval = 1000
-    ! Termination: phase_Si_Burn flag (MESA, L_Si > 100 Lsun), as in the
-    ! original successful runs.
+    ! Termination: phase_Ne_Burn flag (MESA) - 10 Msun does not reach the
+    ! Si-flag threshold (cores die in Ne/O-burn instead).
     max_num_profile_models = 9999
     history_interval = 50
     profile_interval = 50
@@ -64,7 +64,7 @@
 
 
     ! stop_at_phase_C_Burn = .true.
-    stop_at_phase_Si_Burn = .true.
+    stop_at_phase_Ne_Burn = .true.
     ! stop_at_phase_WDCS = .true.
 
    !! stop when the star nears ZAMS (Lnuc/L > 0.99)
@@ -89,6 +89,11 @@
    ! mlt
 
    ! mixing
+   ! Ledoux + semiconvection, as in test_suite/*_pre_ms_to_core_collapse
+   use_Ledoux_criterion = .true.
+   semiconvection_option = 'Langer_85 mixing; gradT = gradr'
+   alpha_semiconvection = 1d-2
+
 
    ! timesteps
     ! time_delta_coeff = 2

@@ -89,6 +89,11 @@
    ! mlt
 
    ! mixing
+   ! Ledoux + semiconvection, as in test_suite/*_pre_ms_to_core_collapse
+   use_Ledoux_criterion = .true.
+   semiconvection_option = 'Langer_85 mixing; gradT = gradr'
+   alpha_semiconvection = 1d-2
+
 
    ! timesteps
     ! time_delta_coeff = 2

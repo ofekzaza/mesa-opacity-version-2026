@@ -76,11 +76,6 @@
    ! limit_for_rel_error_in_energy_conservation = 1d-3
    ! hard_limit_for_rel_error_in_energy_conservation = 1d-2
 
-   ! solver robustness: unlimited retries (default -1) + more Newton
-   ! iterations per solve.  A hard retry cap previously killed the run.
-   solver_max_tries_before_reject = 100
-   max_tries_for_retry = 50
-   max_tries_after_5_retries = 50
 
    ! mixing: Ledoux + semiconvection, as in MESA's 12M test-suite recipe
    ! (12M_pre_ms_to_core_collapse/inlist_common).  Physically appropriate for
