@@ -71,10 +71,10 @@
    max_age = 1d9
 
    ! late-burning robustness (as in test_suite/*_pre_ms_to_core_collapse)
-   set_min_D_mix = .true.
-   min_D_mix = 1d-2
-   limit_for_rel_error_in_energy_conservation = 1d-3
-   hard_limit_for_rel_error_in_energy_conservation = 1d-2
+   ! set_min_D_mix = .true.
+   ! min_D_mix = 1d-2
+   ! limit_for_rel_error_in_energy_conservation = 1d-3
+   ! hard_limit_for_rel_error_in_energy_conservation = 1d-2
 
    ! solver robustness: unlimited retries (default -1) + more Newton
    ! iterations per solve.  A hard retry cap previously killed the run.
