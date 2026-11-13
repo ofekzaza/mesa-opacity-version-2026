@@ -81,6 +81,7 @@
                   end if
                end if
 
+
                extra_opacity_factor_memory_target(i) = extra_opacity_factor_memory_target(i) * (1 - alpha ) + alpha * opacity_target
 
                s% extra_opacity_factor(i) = extra_opacity_factor_memory_target(i)
@@ -166,13 +167,6 @@
             call star_ptr(id, s, ierr)
             if (ierr /= 0) return
             extras_check_model = keep_going
-            ! --- porosity-reduction project: stop when Si burning is well underway
-            if (s% log_center_temperature > 9.6d0) then
-               extras_check_model = terminate
-               s% termination_code = t_extras_check_model
-               write(*, *) 'terminate: logT_center > 9.6 (Si burning well underway)'
-               return
-            end if
             ! if (.false. .and. s% star_mass_h1 < 0.35d0) then
             !    ! stop when star hydrogen mass drops to specified level
             !    extras_check_model = terminate
@@ -255,6 +249,7 @@
             do k = 1, nz
                vals(k,1) = s% gradT(k) * 4.0d0 * (s % T(k) ** 4) * 7.5646d-15 / (3 * s% Peos(k))
             end do
+
          end subroutine data_for_extra_profile_columns
 
 

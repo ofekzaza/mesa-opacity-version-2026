@@ -32,7 +32,6 @@
    new_net_name = 'approx21_cr60_plus_co56.net'
 
    ! official termination code string for the log_max_temp_upper_limit
-   ! backstop (this is a star_job namelist variable)
    required_termination_code_string = 'log_max_temp_upper_limit'
 
 / ! end of star_job namelist
@@ -64,15 +63,12 @@
    initial_z = 0.02
 
    ! stops: primary Si-burn stop lives in run_star_extras.f90
-   ! (logT_center > 9.6).  Official backstop just above it (9.7) so a
    ! missed hook can never run away into collapse; fe_core_infall_limit is
-   ! the physical Fe-core safeguard.
    log_max_temp_upper_limit = 9.7d0
    fe_core_infall_limit = 3d7
    xa_central_upper_limit_species(1) = 'fe56'
    xa_central_upper_limit(1) = 0.5
    max_age = 1d9
-   max_model_number = 200000
 
    ! late-burning robustness (as in test_suite/*_pre_ms_to_core_collapse)
    set_min_D_mix = .true.
@@ -82,7 +78,6 @@
 
    ! solver robustness: unlimited retries (default -1) + more Newton
    ! iterations per solve.  A hard retry cap previously killed the run.
-   max_number_retries = -1
    solver_max_tries_before_reject = 100
    max_tries_for_retry = 50
    max_tries_after_5_retries = 50
