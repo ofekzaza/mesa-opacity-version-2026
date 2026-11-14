@@ -85,10 +85,32 @@
    semiconvection_option = 'Langer_85 mixing; gradT = gradr'
    alpha_semiconvection = 1d-2
 
+   ! small "any-zone" exponential overshoot (12M test-suite recipe): smooths
+   ! composition boundaries at burn fronts, avoids spurious numerical behavior.
+   overshoot_scheme(4) = 'exponential'
+   overshoot_zone_type(4) = 'any'
+   overshoot_zone_loc(4) = 'any'
+   overshoot_bdy_loc(4) = 'any'
+   overshoot_f(4) = 0.005d0
+   overshoot_f0(4) = 0.001d0
+
    ! solver / energy options (explicit; these are also MESA defaults)
    MLT_option = 'TDC'
    use_gold_tolerances = .true.
    energy_eqn_option = 'dedt'
+
+   ! operator-split burning from 1 GK (12M test-suite recipe): decouples the
+   ! stiff nuclear-burning energy release from the structure solve during
+   ! O/Si burn — the failure zone where previous suite runs stalled.
+   op_split_burn = .true.
+   op_split_burn_min_T = 1d9
+   burn_steps_limit = 150
+   burn_steps_hard_limit = 250
+   op_split_burn_eps = 1d-5
+   op_split_burn_odescal = 1d-5
+
+   ! allow very small timesteps instead of terminating at the 1e-6 s floor
+   min_timestep_limit = 1d-12
 
    ! wind
    hot_wind_scheme = 'Dutch'
