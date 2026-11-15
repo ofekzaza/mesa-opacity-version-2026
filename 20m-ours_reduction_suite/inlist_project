@@ -112,6 +112,32 @@
    ! allow very small timesteps instead of terminating at the 1e-6 s floor
    min_timestep_limit = 1d-12
 
+   ! finer mesh at high T (12M test-suite recipe): resolve the thin O/Si
+   ! burning shell where the run has repeatedly stalled (logT ~9.2)
+   mesh_delta_coeff = 2.5
+   mesh_delta_coeff_for_highT = 1.5
+   logT_max_for_standard_mesh_delta_coeff = 9.0d0
+   logT_min_for_highT_mesh_delta_coeff = 9.5d0
+
+   ! solver / timestep fine-tuning from the 12M test-suite recipe
+   scale_max_correction = 0.1d0
+   ignore_species_in_max_correction = .true.
+   use_gold2_tolerances = .true.
+   gold2_tol_max_residual2 = 5d-7
+   gold2_tol_max_residual3 = 5d-4
+   convergence_ignore_equL_residuals = .true.
+   make_gradr_sticky_in_solver_iters = .true.
+   iter_for_resid_tol2 = 10
+   solver_iters_timestep_limit = 20
+   min_timestep_factor = 0.8d0
+   max_timestep_factor = 1.05d0
+   delta_lgT_cntr_limit = 0.002d0
+   delta_lgT_cntr_hard_limit = 0.1d0
+   delta_lgRho_cntr_limit = 0.03d0
+   max_abs_rel_run_E_err = 1d-2
+   when_to_stop_rtol = 1d-3
+   when_to_stop_atol = 1d-3
+
    ! wind
    hot_wind_scheme = 'Dutch'
    Dutch_scaling_factor = 0.66
