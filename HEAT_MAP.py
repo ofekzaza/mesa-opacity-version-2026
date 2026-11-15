@@ -171,13 +171,13 @@ def _draw_heatmap(
         # x is descending here (oldest -> newest); np.interp needs ascending
         interp_x = x[::-1]
         interp_secondary = secondary[::-1]
-        x_label = "Star Time To Live [years]\n(Model Number)"
+        x_label = "Star Time To Live (years)\n(Model Number)"
         file_suffix = "_xstar_age"
     else:
         order = np.argsort(mn)
         x = mn[order]
         secondary = sa[order]
-        x_label = "Model Number\n(Star Age [years])"
+        x_label = "Model Number\n(Star Age in years)"
         file_suffix = ""
 
     DATA = DATA[:, order]
@@ -189,7 +189,7 @@ def _draw_heatmap(
 
     if value_axis == "extra_opacity_factor":
         data_for_plot = DATA * 100
-        cbar_label = utils.pretty_axis_name(value_axis) + " [%]"
+        cbar_label = utils.pretty_axis_name(value_axis) + " (%)"
     else:
         data_for_plot = DATA
         cbar_label = utils.pretty_axis_name(value_axis)
@@ -245,10 +245,7 @@ def _draw_heatmap(
 
     plt.xlabel(x_label)
 
-    if y_units:
-        plt.ylabel(f"{utils.pretty_axis_name(y_axis)} [{y_units}]")
-    else:
-        plt.ylabel(utils.pretty_axis_name(y_axis))
+    plt.ylabel(utils.format_axis_label(y_axis, y_units))
     plt.tight_layout()
     out_path = (
         f"{utils.PLOTS_ROOT}/plot{mass}m{phase_suffix}/"

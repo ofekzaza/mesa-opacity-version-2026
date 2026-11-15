@@ -114,12 +114,10 @@ def plot(
             conv_plotted = True
 
     if conv_plotted:
-        plt.plot([], [], color="0.25", linewidth=3.2, label="Convection (thick line, conv_vel > 0)")
+        plt.plot([], [], color="0.25", linewidth=3.2, label="Convection")
 
-    x_units_str = fr" [{x_units}]" if x_units else ""
-    y_units_str = fr" [{y_units}]" if y_units else ""
-    plt.xlabel(f"{utils.pretty_axis_name(x_axis)}{x_units_str}")
-    plt.ylabel(f"{utils.pretty_axis_name(y_axis)}{y_units_str}")
+    plt.xlabel(utils.format_axis_label(x_axis, x_units))
+    plt.ylabel(utils.format_axis_label(y_axis, y_units))
 
     if inverse_x:
         plt.gca().invert_xaxis()

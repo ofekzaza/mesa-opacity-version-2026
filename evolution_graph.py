@@ -344,7 +344,7 @@ def plot(mass: int, names: list[str], y_axis: str, phase: str = ""):
         print(f"    evolution_graph: nothing to plot for '{y_axis}'")
         return
 
-    plt.xlabel("Star Age [yr]")
+    plt.xlabel("Star Age (yr)")
     plt.ylabel(utils.pretty_axis_name(y_axis))
     plt.grid(True)
     plt.legend()
@@ -415,7 +415,7 @@ def plot_percentages(mass: int, names: list[str], phase: str = ""):
         print("    percentages: nothing to plot")
         return
 
-    plt.xlabel("Star Age [yr]")
+    plt.xlabel("Star Age (yr)")
     plt.ylabel("Percentage")
     plt.ylim(0, 105)
     plt.grid(True)
@@ -455,7 +455,7 @@ def _draw_tau_figure(
 
     ax = plt.gca()
     plt.xlabel(xlabel)
-    plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ [1/yr]")
+    plt.ylabel(r"$\tau = \frac{1}{X}\frac{dX}{dt}$ $(\mathrm{yr}^{-1})$")
     if invert_x:
         ax.invert_xaxis()
     # ax.set_xscale("log") # lets try with no log scale
@@ -592,7 +592,7 @@ def plot_taus(mass: int, names: list[str], phase: str = ""):
     _draw_tau_figure(
         x=x_time,
         series=data["series"],
-        xlabel="Star Time To Live [years]",
+        xlabel="Star Time To Live (years)",
         out_path=f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_time.png",
         invert_x=True,
         mass_initial=mass_initial,
@@ -611,7 +611,7 @@ def plot_taus(mass: int, names: list[str], phase: str = ""):
         _draw_tau_figure(
             x=x_model,
             series=series_model,
-            xlabel="Model Number\n(Star Age [years])",
+            xlabel="Model Number\n(Star Age in years)",
             out_path=f"{out_dir}/Mass_{mass}_tau_M_H_HT_vs_model_number.png",
             invert_x=False,
             mass_initial=mass_initial,

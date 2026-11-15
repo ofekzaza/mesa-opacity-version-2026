@@ -143,7 +143,7 @@ def _plot_abundance_vs_logr(prof, mass: int, name: str, phase: str, out_dir: str
                 color=ISO_COLORS.get(iso, "#333333"),
                 linewidth=1.2,
             )
-        ax.set_xlabel("log(R/R\u2609)")
+        ax.set_xlabel(r"$\log(R/R_\odot)$")
         _setup_ax(ax)
         _finalize_ax(ax)
     plt.tight_layout()
@@ -167,7 +167,7 @@ def _plot_abundance_vs_logrho(prof, mass: int, name: str, phase: str, out_dir: s
                 color=ISO_COLORS.get(iso, "#333333"),
                 linewidth=1.2,
             )
-        ax.set_xlabel("log(\u03c1) [g/cm\u00b3]")
+        ax.set_xlabel(r"$\log(\rho\,[\mathrm{g\,cm^{-3}}])$")
         _setup_ax(ax)
         _finalize_ax(ax)
     plt.tight_layout()
@@ -214,7 +214,7 @@ def _plot_abundance_evolution_from_data(
         sec_ax.set_xticklabels(
             [f"{star_ages[i]:.2e}" for i in idx], fontsize=7, rotation=45
         )
-        sec_ax.set_xlabel("Star Age [yr]", fontsize=8)
+        sec_ax.set_xlabel("Star Age (yr)", fontsize=8)
 
     plt.tight_layout()
     plt.savefig(f"{out_dir}/Mass_{mass}_{name}_abundance_evolution.png", dpi=300)

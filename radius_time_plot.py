@@ -96,7 +96,7 @@ def plot_phase(
 
     if log_scale:
         ax.set_xscale("log")
-    ax.set_xlabel("Star age [yr]")
+    ax.set_xlabel("Star age (yr)")
     ax.set_ylabel(r"$\log\,(R/R_\odot)$")
     ax.set_title(
         f"Radius evolution of our models, {min(masses)}-{max(masses)} "

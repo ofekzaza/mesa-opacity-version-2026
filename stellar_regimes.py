@@ -8,7 +8,7 @@ point.
 Contents
 --------
 * EOS boundaries (P_gas = P_rad, ideal/degenerate, NR/relativistic degenerate)
-* Gamma_1 < 4/3 zones: pair creation (computed from an e+- EOS), H/He
+* Gamma_1 < 4/3 zones: pair creation (computed from an e+- EOS), H/He/Fe
   ionization (Saha), Fe photodisintegration and electron capture (schematic)
 * Nuclear ignition curves  eps(rho, T) = eps_thr
 """
@@ -85,21 +85,33 @@ def _log_t_ionization(chi_ev, log_rho, n_per_rho, x):
 
 
 def ionization_bands(log_rho, x_lo=0.1, x_hi=0.9, h_mass_frac=0.70,
-                     he_mass_frac=0.28):
-    """(logT_low, logT_high) of the H, He I and He II partial-ionization zones
-    as functions of log rho. Gamma_1 < 4/3 roughly where 10% < x < 90%."""
+                     he_mass_frac=0.28, fe_mass_frac=0.0013):
+    """(logT_low, logT_high) of the H, He I, He II and Fe partial-ionization
+    zones as functions of log rho. Gamma_1 < 4/3 roughly where 10% < x < 90%.
+
+    Fe is bracketed by the M-shell stripping stages Fe VIII (151 eV) ->
+    Fe XVI (489 eV), i.e. the partial-ionization region behind the canonical
+    iron opacity bump at log T ~ 5.2-5.3 (T ~ 2e5 K). A single effective
+    potential would give a band that is far too narrow, so the union of the
+    stage edges is used instead.
+    """
     m_h = 1.6735e-24
+    n_fe = fe_mass_frac / (56 * m_h)
     species = {
         "H": (13.598, h_mass_frac / m_h),
         "He I": (24.587, he_mass_frac / (4 * m_h)),
         "He II": (54.418, he_mass_frac / (4 * m_h)),
+        "Fe": [(151.0, n_fe), (489.0, n_fe)],
     }
     bands = {}
-    for name, (chi, n_per_rho) in species.items():
-        bands[name] = (
-            _log_t_ionization(chi, log_rho, n_per_rho, x_lo),
-            _log_t_ionization(chi, log_rho, n_per_rho, x_hi),
-        )
+    for name, spec in species.items():
+        if isinstance(spec, tuple):
+            spec = [spec]
+        lo_list, hi_list = [], []
+        for chi, n_per_rho in spec:
+            lo_list.append(_log_t_ionization(chi, log_rho, n_per_rho, x_lo))
+            hi_list.append(_log_t_ionization(chi, log_rho, n_per_rho, x_hi))
+        bands[name] = (np.minimum.reduce(lo_list), np.maximum.reduce(hi_list))
     return bands
 
 

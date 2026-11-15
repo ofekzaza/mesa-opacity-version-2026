@@ -32,14 +32,14 @@ pretty_axises = {
     "log_L_div_Ledd": r"$\log(L/L_{edd})$",
     "log_opacity": r"$\log(\kappa)$",
     "extra_opacity_factor": "extra opacity factor",
-    "logT": r"$\log(T)$ [K]",
-    "temperature": r"$T$ [K]",
+    "logT": r"$\log(T/\mathrm{K})$",
+    "temperature": r"$T/\mathrm{K}$",
     "entropy": r"$S$",
     "mass": r"$M/M_{\odot}$",
     "logR": r"$\log(R/R_{\odot})$",
     "logRho": r"$\log(\rho)$",
     "logP": r"$\log(P)$",
-    "star_age": "Star Age [yr]",
+    "star_age": "Star Age (yr)",
     "star_mass": r"$M/M_{\odot}$",
     "logL": r"$\log(L/L_{\odot})$",
     "R": r"$R/R_{\odot}$",
@@ -48,6 +48,32 @@ pretty_axises = {
 
 def pretty_axis_name(axis: str) -> str:
     return pretty_axises.get(axis, axis)
+
+
+UNIT_REMAP = {
+    "g/cm³": r"\mathrm{g\,cm^{-3}}",
+    "g/cm^3": r"\mathrm{g\,cm^{-3}}",
+    r"g/cm$^3$": r"\mathrm{g\,cm^{-3}}",
+    "K": r"\mathrm{K}",
+    "yr": r"\mathrm{yr}",
+    "1/yr": r"\mathrm{yr}^{-1}",
+}
+
+
+def format_axis_label(axis: str, units: str = "") -> str:
+    """Axis label with standard typography.
+
+    Units go inside the argument as a bracketed quantity for logarithmic
+    quantities (e.g. log(ρ [g cm⁻³])), or in parentheses after the name
+    otherwise; unit symbols are always upright roman.
+    """
+    name = pretty_axis_name(axis)
+    if not units or "\\mathrm" in name:
+        return name
+    u = UNIT_REMAP.get(units, units)
+    if name.startswith("$\\log(") and name.endswith(")$"):
+        return "$\\log(" + name[6:-2] + "\\,[" + u + "])$"
+    return f"{name} ({u})"
 
 
 def get_last_profile_num(logs_path: str) -> int:

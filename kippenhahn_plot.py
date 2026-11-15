@@ -378,7 +378,7 @@ class KippenhahnCollector:
             red_grid=red_grid[:, reorder],
             surface=surface[reorder],
             core_lines=core_ttl,
-            x_label="Star Time To Live [years]",
+            x_label="Star Time To Live (years)",
             log_x=True,
             invert_x=True,
             y_lim=y_lim,
@@ -579,7 +579,7 @@ class KippenhahnCollector:
         if invert_x:
             ax.invert_xaxis()
         ax.set_xlabel(x_label)
-        ax.set_ylabel(r"Enclosed mass $M_r$ [$M_\odot$]")
+        ax.set_ylabel(r"Enclosed mass $M_r$ ($M_\odot$)")
         ax.grid(True, which="major", alpha=0.18, linewidth=0.5)
 
         burn_handles = [

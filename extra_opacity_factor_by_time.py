@@ -2,6 +2,8 @@ import math
 import mesa_reader as mr
 import matplotlib.pyplot as plt
 
+import utils
+
 options = """
 zone
 mass
@@ -294,9 +296,9 @@ def plot(x_axis: str, x_units: str, y_axis: str, y_units: str):
                 aspect="auto",
                 extent=[0, n_profiles, common_x[0], common_x[-1]],
             )
-            plt.colorbar(label=f"{y_axis} [{y_units}]")
+            plt.colorbar(label=utils.format_axis_label(y_axis, y_units))
             plt.xlabel("Profile Index")
-            plt.ylabel(f"{x_axis} [{x_units}]")
+            plt.ylabel(utils.format_axis_label(x_axis, x_units))
             plt.title(f"Mass {mass}: {y_axis} vs {x_axis}")
             plt.tight_layout()
             os.makedirs(f"plot{mass}m", exist_ok=True)

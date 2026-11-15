@@ -9,7 +9,7 @@ Background physics is computed in `stellar_regimes.py`. Conventions:
   shifts the degenerate lines up by log10(2/1.17) ~ 0.23 dex.
 * The degeneracy line uses ideal electron pressure = NR-degenerate pressure
   (zero point -7.62 + log10(mu_e)), not the psi = 0 criterion.
-* Gamma_1 < 4/3 zones: pair creation (full e+- EOS contour), H/He partial
+* Gamma_1 < 4/3 zones: pair creation (full e+- EOS contour), H/He/Fe partial
   ionization (Saha), Fe photodisintegration and electron capture (schematic).
 * Ignition curves are the eps(rho, T) = EPS_THRESHOLD = 10 erg/g/s loci
   (no neutrino losses; electron screening included).
@@ -193,7 +193,8 @@ def draw_gamma1_zones(ax):
     ax.contour(log_t, log_rho, g1.T, levels=[level], colors=[ZONE_COLOR],
                linewidths=1.0, alpha=0.8, zorder=1)
 
-    # H / He partial ionization: bands that follow the Saha curves.
+    # H / He / Fe partial ionization: bands that follow the Saha curves.
+    # Fe sits at log T ~ 5.2-5.3 (the canonical iron opacity bump / Z-bump).
     log_rho_i = np.linspace(-12.0, -2.0, 80)
     for lo, hi in sr.ionization_bands(log_rho_i).values():
         ax.fill_betweenx(log_rho_i, lo, hi, color=ZONE_COLOR, alpha=0.22,
@@ -286,6 +287,8 @@ def _add_labels(ax, curves):
                 transform=ax.get_yaxis_transform(), va="center", zorder=6)
     if _in_view(ax, 3.8, -3.5):
         _text_inside(ax, 3.8, -3.5, "H/He\nionization", ZONE_COLOR)
+    if _in_view(ax, 5.3, -3.5):
+        _text_inside(ax, 5.3, -3.5, "Fe\nionization", ZONE_COLOR)
 
     # Marginal-stability zones (Gamma_1 -> 4/3): labelled inside the zones.
     if _in_view(ax, 7.5, -5.0):
@@ -365,8 +368,8 @@ def plot(mass: int, names: list[str], phase: str = "",
         pad_y = 0.05 * (data_y_max - data_y_min) or 0.5
         ax.set_ylim(data_y_min - pad_y, data_y_max + pad_y)
 
-    plt.xlabel(r"$\log[T(K)]$")
-    plt.ylabel(r"$\log[\rho(\text{g}/\text{cm}^3)]$")
+    plt.xlabel(r"$\log(T/\mathrm{K})$")
+    plt.ylabel(r"$\log(\rho\,[\mathrm{g\,cm^{-3}}])$")
 
     plt.legend(fontsize=8)
     plt.tight_layout()
