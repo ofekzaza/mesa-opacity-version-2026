@@ -114,17 +114,26 @@ def _text_inside(ax, x, y, text, color, fontsize=8, **kw):
 
 
 def _label_along(ax, x, y, text, frac, color, offset_pts=(0, 4),
-                 at_rho=None, angle_deg=None, **kw):
+                 at_rho=None, at_logT=None, at_point=None, angle_deg=None,
+                 **kw):
     """Put `text` on a curve at `frac` (0..1) of its visible length, rotated
     to follow the curve on screen, kept fully inside the axes frame.
 
-    If `at_rho` is given, the label is pinned at the visible curve point with
-    that log-rho value instead of at `frac`. `angle_deg` overrides the
-    automatic tangent angle."""
+    If `at_rho` (or `at_logT`) is given, the label is pinned at the visible
+    curve point with that log-rho (or log-T) value instead of at `frac`.
+    If `at_point`=(logT, logRho) is given, the label is anchored at that
+    exact data point (clamped into the frame), rotated along the nearby
+    curve tangent. `angle_deg` overrides the automatic tangent angle."""
     idx = _visible_indices(ax, x, y)
     if len(idx) < 3:
         return
-    if at_rho is not None:
+    if at_point is not None:
+        d = np.hypot(np.asarray(x)[idx] - at_point[0],
+                     np.asarray(y)[idx] - at_point[1])
+        k = idx[int(np.argmin(d))]
+    elif at_logT is not None:
+        k = idx[int(np.argmin(np.abs(np.asarray(x)[idx] - at_logT)))]
+    elif at_rho is not None:
         k = idx[int(np.argmin(np.abs(np.asarray(y)[idx] - at_rho)))]
     else:
         k = idx[int(np.clip(frac, 0, 1) * (len(idx) - 1))]
@@ -138,7 +147,10 @@ def _label_along(ax, x, y, text, frac, color, offset_pts=(0, 4),
         elif angle_deg < -90:
             angle_deg += 180
     angle = angle_deg
-    px, py, bb = _clamped_display(ax, x[k], y[k])
+    if at_point is not None:
+        px, py, bb = _clamped_display(ax, at_point[0], at_point[1])
+    else:
+        px, py, bb = _clamped_display(ax, x[k], y[k])
     ha, va = _pick_align(bb, px, py)
     kw.setdefault("ha", ha)
     kw.setdefault("va", va)
@@ -240,27 +252,37 @@ def _add_labels(ax, curves):
 
     for stage, (ct, cr) in curves.items():
         angle_deg = None
+        offset_pts = (-3, -3)
         if stage == "H":
-            idxv = _visible_indices(ax, ct, cr)
-            if len(idxv) > 2:
-                k = idxv[int(0.9 * (len(idxv) - 1))]
-                if abs(float(cr[k]) + 3.0) < 0.05:   # never pin at rho=-3 end
-                    k = idxv[max(1, int(0.9 * (len(idxv) - 1)) - 1)]
-                at_rho, frac = float(cr[k]), 1.0
-            else:
-                at_rho, frac = None, 0.9
+            # Pinned at (logT, logRho) = (7.45, -2.7), rotated with the line.
+            at_rho, at_logT, at_point = None, None, (7.45, -2.7)
+            frac = 1.0
         elif stage == "He":
-            at_rho, frac = 0.0, 1.0
+            # Pinned at logrho = 0, nudged down along its current angle.
+            at_rho, at_logT, at_point = 0.0, None, None
+            frac = 1.0
+            offset_pts = (-3, -9)
         elif stage == "Ne":
-            at_rho, frac = 2.25, 1.0
-        elif stage in ("C", "O"):
-            at_rho, frac = None, 0.0
+            at_rho, at_logT, at_point = 2.25, None, None
+            frac = 1.0
+        elif stage in ("C", "O", "Si"):
+            # Lower part of the line (low logrho end).
+            at_rho, at_logT, at_point = None, None, None
+            frac = 0.0
+            if stage == "Si":
+                # Slight move along the line: -0.01 in logT.
+                idxv = _visible_indices(ax, ct, cr)
+                if len(idxv):
+                    at_logT = float(ct[idxv[0]]) - 0.01
+                    frac = 1.0
         else:
-            at_rho, frac = None, 1.0
+            at_rho, at_logT, at_point = None, None, None
+            frac = 1.0
         _label_along(ax, ct, cr, f"{stage} burn", frac=frac,
                      color=sr.BURNING_STAGES[stage]["color"],
-                     at_rho=at_rho, angle_deg=angle_deg,
-                     offset_pts=(-3, -3), zorder=1.5)
+                     at_rho=at_rho, at_logT=at_logT, at_point=at_point,
+                     angle_deg=angle_deg,
+                     offset_pts=offset_pts, zorder=1.5)
 
     _label_along(ax, t, sr.log_rho_prad_eq_pgas(t), r"$P_{\rm gas}=P_{\rm rad}$",
                  0.15, BOUNDARY_COLOR, offset_pts=(0, -18))
@@ -294,9 +316,11 @@ def _add_labels(ax, curves):
     if _in_view(ax, 7.5, -5.0):
         _text_inside(ax, 7.5, -5.0,
                      r"$\Gamma_1\to4/3$", MARGINAL_COLOR)
-    if _in_view(ax, 9.9, 5.0):
-        _text_inside(ax, 9.9, 5.0,
-                     r"$\Gamma_1\to4/3$", MARGINAL_COLOR)
+    # The high-T one is placed right of the pair-creation red zone; draw it
+    # unconditionally (clamped into the frame) so it is visible even on
+    # frames that do not reach logT = 9.7. Rotated 90 deg (vertical text).
+    _text_inside(ax, 9.7, 0.0,
+                 r"$\Gamma_1\to4/3$", MARGINAL_COLOR, rotation=90)
 
 
 # --- main entry points -------------------------------------------------------

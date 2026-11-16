@@ -296,21 +296,21 @@ def _make_power_rate(nu, lam, anchor):
 # Stage definitions. `rate(T, rho)` returns eps in erg/g/s.
 BURNING_STAGES = {
     "H": dict(rate=lambda t, r: _eps_pp(t, r) + _eps_cno(t, r),
-              log_rho=(-3.0, 6.0), log_t_min=6.3, color="#ffb3b3",
+              log_rho=(-3.0, 6.0), log_t_min=6.3, color="#e57373",
               note="pp + CNO, X=0.7, Z_CNO=0.01"),
     "He": dict(rate=_eps_3alpha, log_rho=(0.0, 8.0), log_t_min=7.0, color="#ff6666",
                note="triple-alpha, Y=1"),
     "C": dict(rate=_make_gamow_rate(6, 6, 6.0, 2.0, 3.5, anchor=(8.8, 5.0)),
-              log_rho=(2.0, 10.0), log_t_min=7.8, color="#cc0000",
+              log_rho=(0.0, 10.0), log_t_min=7.8, color="#cc0000",
               note="C+C, Gamow shape + screening, through (8.8, 5.0)"),
     "Ne": dict(rate=_make_power_rate(nu=46.0, lam=1.0, anchor=(9.15, 6.5)),
                log_rho=(1.0, 10.0), log_t_min=8.3, color="#b34700",
                note="photodisintegration, nu~Q/kT, through (9.15, 6.5)"),
     "O": dict(rate=_make_gamow_rate(8, 8, 8.0, 2.0, 4.5, anchor=(9.3, 7.0)),
-              log_rho=(4.0, 10.0), log_t_min=8.5, color="#800000",
+              log_rho=(1.0, 10.0), log_t_min=8.5, color="#800000",
               note="O+O, Gamow shape + screening, through (9.3, 7.0)"),
     "Si": dict(rate=_make_power_rate(nu=50.0, lam=1.0, anchor=(9.55, 7.7)),
-               log_rho=(5.0, 10.0), log_t_min=8.8, color="#4d0000",
+               log_rho=(2.0, 10.0), log_t_min=8.8, color="#4d0000",
                note="quasi-equilibrium Si burning, schematic, through (9.55, 7.7)"),
 }
 
