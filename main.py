@@ -25,8 +25,10 @@ def _get_phase(name: str) -> str:
         return "post_ms"
     elif name.endswith("_suite"):
         return "suite"
+    elif name.endswith("_post_default"):
+        return "post_ms_default"
     elif name.endswith("_default"):
-        return "default"
+        return "pre_ms_default"
     elif name.endswith("_reduction"):
         return "pre_ms"
     return ""
