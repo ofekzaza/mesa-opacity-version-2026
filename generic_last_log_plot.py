@@ -84,6 +84,12 @@ def plot(
 
     all_winds = all("_reduction" in n for n in names)
     all_post = all(n.endswith("_post") for n in names)
+    all_suite = all(n.endswith("_suite") for n in names)
+
+    n_plotted = sum(1 for n in names
+                    if profiles.get(n) is not None
+                    and hasattr(profiles[n], y_axis) and hasattr(profiles[n], x_axis))
+    force_solid = n_plotted <= 1
 
     for name in names:
         prof = profiles.get(name)
@@ -101,7 +107,8 @@ def plot(
         y_data = getattr(prof, y_axis)
 
         kwargs, is_winds, base_name = utils.get_line_kwargs(
-            name, base_colors, drop_winds=all_winds, drop_post=all_post
+            name, base_colors, drop_winds=all_winds, drop_post=all_post,
+            drop_suite=all_suite, force_solid=force_solid,
         )
         (line,) = plt.plot(x_data, y_data, **kwargs)
         color = line.get_color()

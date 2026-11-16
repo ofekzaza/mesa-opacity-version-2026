@@ -344,8 +344,14 @@ def plot(mass: int, names: list[str], phase: str = "",
 
     all_winds = all("_reduction" in n for n in names)
     all_post = all(n.endswith("_post") for n in names)
+    all_suite = all(n.endswith("_suite") for n in names)
 
     profiles = _preloaded if _preloaded is not None else load_last_profiles(mass, names)
+
+    n_plotted = sum(1 for n in names
+                    if profiles.get(n) is not None
+                    and hasattr(profiles[n], "logT") and hasattr(profiles[n], "logRho"))
+    force_solid = n_plotted <= 1
 
     data_x_min = data_x_max = None
     data_y_min = data_y_max = None
@@ -369,7 +375,8 @@ def plot(mass: int, names: list[str], phase: str = "",
         data_y_max = ya.max() if data_y_max is None else max(data_y_max, float(ya.max()))
 
         kwargs, is_winds, base_name = utils.get_line_kwargs(
-            name, base_colors, drop_winds=all_winds, drop_post=all_post
+            name, base_colors, drop_winds=all_winds, drop_post=all_post,
+            drop_suite=all_suite, force_solid=force_solid,
         )
         (line,) = plt.plot(x_data, y_data, **kwargs)
         color = line.get_color()

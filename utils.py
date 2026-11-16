@@ -128,7 +128,8 @@ def list_profiles(logs_path: str) -> list[str]:
 
 
 def get_line_kwargs(name: str, base_colors: dict, drop_winds: bool = False,
-                    drop_post: bool = False) -> tuple[dict, bool, str]:
+                    drop_post: bool = False, drop_suite: bool = False,
+                    force_solid: bool = False) -> tuple[dict, bool, str]:
     plot_name = parse_name_for_plots(name)
     is_winds = "_reduction" in name
     base_name = name.replace("_reduction", "")
@@ -137,9 +138,13 @@ def get_line_kwargs(name: str, base_colors: dict, drop_winds: bool = False,
         plot_name = plot_name.replace(" Winds", "").replace(" winds", "")
     if drop_post:
         plot_name = plot_name.replace(" Post", "").replace(" post", "")
+    if drop_suite:
+        plot_name = plot_name.replace(" Suite", "").replace(" suite", "")
 
     kwargs = {"label": plot_name, "linewidth": 0.8}
-    if is_winds and base_name in base_colors:
+    if force_solid:
+        kwargs["linestyle"] = "-"
+    elif is_winds and base_name in base_colors:
         kwargs["color"] = base_colors[base_name]
         kwargs["linestyle"] = "--"
     elif is_winds:
