@@ -1,0 +1,145 @@
+! 20m-ours_reduction_suite — minimal proof-of-concept.
+!
+! Purpose: prove that the "ours" porosity-reduction model can reach
+! Si interactions and Fe-core formation (the logT_center > 9.6 stop in
+! src/run_star_extras.f90).  This is the plain project base config
+! (20m-ours_reduction) + the large-from-start network + solver robustness.
+! Mixing follows the physical recipe of MESA's own 12M test-suite
+! (12M_pre_ms_to_core_collapse/inlist_common): Ledoux + semiconvection +
+! TDC MLT.  The test-suite's large overshoot block is intentionally omitted
+! for simplicity; add it back if you want the full 12M recipe.
+!
+! Kept minimal: only controls that differ from MESA defaults are listed
+! (plus the explicitly restored Ledoux/TDC/gold-tolerance lines).
+
+&star_job
+
+   ! begin with a pre-main sequence model
+   create_pre_main_sequence_model = .true.
+
+   ! save the final model (Si burn / Fe-core) + a final profile
+   save_model_when_terminate = .false.
+   write_profile_when_terminate = .true.
+   filename_for_profile_when_terminate = 'profile_final.data'
+
+   ! display on-screen plots
+   pgstar_flag = .false.
+
+   ! large network from the start — approx21 neglects electron captures
+   ! before the end of O burn (Laplace+ 2021), so use the +Co56 net to
+   ! make it through O/Si to the Fe core.
+   change_net = .true.
+   new_net_name = 'approx21_cr60_plus_co56.net'
+
+   ! official termination code string for the log_max_temp_upper_limit
+   required_termination_code_string = 'log_max_temp_upper_limit'
+
+/ ! end of star_job namelist
+
+
+&eos
+
+/ ! end of eos namelist
+
+
+&kap
+
+   use_Type2_opacities = .true.
+   Zbase = 0.02
+
+/ ! end of kap namelist
+
+
+&controls
+
+   terminal_interval = 1000
+   history_interval = 50
+   profile_interval = 50
+   photo_interval = 1000
+   max_num_profile_models = 9999
+
+   ! starting specifications
+   initial_mass = 100 ! in Msun units
+   initial_z = 0.02
+
+   ! stops: primary Si-burn stop lives in run_star_extras.f90
+   ! missed hook can never run away into collapse; fe_core_infall_limit is
+   log_max_temp_upper_limit = 9.7d0
+   fe_core_infall_limit = 3d7
+   xa_central_upper_limit_species(1) = 'fe56'
+   xa_central_upper_limit(1) = 0.5
+   max_age = 1d9
+
+   ! late-burning robustness (as in test_suite/*_pre_ms_to_core_collapse)
+   ! set_min_D_mix = .true.
+   ! min_D_mix = 1d-2
+   ! limit_for_rel_error_in_energy_conservation = 1d-3
+   ! hard_limit_for_rel_error_in_energy_conservation = 1d-2
+
+
+   ! ! mixing: Ledoux + semiconvection, as in MESA's 12M test-suite recipe
+   ! ! (12M_pre_ms_to_core_collapse/inlist_common).  Physically appropriate for
+   ! ! a 20 M☉ star: the stabilizing composition gradient matters in core-He
+   ! ! burning and sets the C/O-core mass that ultimately reaches Si/Fe core.
+   ! use_Ledoux_criterion = .true.
+   ! semiconvection_option = 'Langer_85 mixing; gradT = gradr'
+   ! alpha_semiconvection = 1d-2
+
+   ! small "any-zone" exponential overshoot (12M test-suite recipe): smooths
+   ! composition boundaries at burn fronts, avoids spurious numerical behavior.
+   overshoot_scheme(4) = 'exponential'
+   overshoot_zone_type(4) = 'any'
+   overshoot_zone_loc(4) = 'any'
+   overshoot_bdy_loc(4) = 'any'
+   overshoot_f(4) = 0.005d0
+   overshoot_f0(4) = 0.001d0
+
+   ! solver / energy options (explicit; these are also MESA defaults)
+   MLT_option = 'TDC'
+   use_gold_tolerances = .true.
+   energy_eqn_option = 'dedt'
+
+   ! operator-split burning from 1 GK (12M test-suite recipe): decouples the
+   ! stiff nuclear-burning energy release from the structure solve during
+   ! O/Si burn — the failure zone where previous suite runs stalled.
+   op_split_burn = .true.
+   op_split_burn_min_T = 1d9
+   burn_steps_limit = 150
+   burn_steps_hard_limit = 250
+   op_split_burn_eps = 1d-5
+   op_split_burn_odescal = 1d-5
+
+   ! allow very small timesteps instead of terminating at the 1e-6 s floor
+   min_timestep_limit = 1d-12
+
+   ! finer mesh at high T (12M test-suite recipe): resolve the thin O/Si
+   ! burning shell where the run has repeatedly stalled (logT ~9.2)
+   mesh_delta_coeff = 2.5
+   mesh_delta_coeff_for_highT = 1.5
+   logT_max_for_standard_mesh_delta_coeff = 9.0d0
+   logT_min_for_highT_mesh_delta_coeff = 9.5d0
+
+   ! solver / timestep fine-tuning from the 12M test-suite recipe
+   scale_max_correction = 0.1d0
+   ignore_species_in_max_correction = .true.
+   use_gold2_tolerances = .true.
+   gold2_tol_max_residual2 = 5d-7
+   gold2_tol_max_residual3 = 5d-4
+   convergence_ignore_equL_residuals = .true.
+   make_gradr_sticky_in_solver_iters = .true.
+   iter_for_resid_tol2 = 10
+   solver_iters_timestep_limit = 20
+   min_timestep_factor = 0.8d0
+   max_timestep_factor = 1.05d0
+   delta_lgT_cntr_limit = 0.002d0
+   delta_lgT_cntr_hard_limit = 0.1d0
+   delta_lgRho_cntr_limit = 0.03d0
+   max_abs_rel_run_E_err = 1d-2
+   when_to_stop_rtol = 1d-3
+   when_to_stop_atol = 1d-3
+
+   ! wind
+   hot_wind_scheme = 'Dutch'
+   Dutch_scaling_factor = 0.66
+
+/ ! end of controls namelist
