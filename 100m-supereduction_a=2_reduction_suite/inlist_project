@@ -122,24 +122,14 @@
    logT_max_for_standard_mesh_delta_coeff = 9.0d0
    logT_min_for_highT_mesh_delta_coeff = 9.5d0
 
-   ! solver / timestep fine-tuning from the 12M test-suite recipe
-   scale_max_correction = 0.1d0
+   ! solver / timestep fine-tuning from the 12M test-suite recipe:
+   ! REMOVED — these strict Newton/timestep controls prevent the 100 Msun
+   ! pre-MS bootstrap from converging (the runs stalled at model 1 / during
+   ! mass relaxation).  MESA defaults are used for the solver instead; the
+   ! physical wall-crossing aids above (op-split, dt floor, overshoot,
+   ! high-T mesh) remain.
    ignore_species_in_max_correction = .true.
    use_gold2_tolerances = .true.
-   gold2_tol_max_residual2 = 5d-7
-   gold2_tol_max_residual3 = 5d-4
-   convergence_ignore_equL_residuals = .true.
-   make_gradr_sticky_in_solver_iters = .true.
-   iter_for_resid_tol2 = 10
-   solver_iters_timestep_limit = 20
-   min_timestep_factor = 0.8d0
-   max_timestep_factor = 1.05d0
-   delta_lgT_cntr_limit = 0.002d0
-   delta_lgT_cntr_hard_limit = 0.1d0
-   delta_lgRho_cntr_limit = 0.03d0
-   max_abs_rel_run_E_err = 1d-2
-   when_to_stop_rtol = 1d-3
-   when_to_stop_atol = 1d-3
 
    ! wind
    hot_wind_scheme = 'Dutch'
