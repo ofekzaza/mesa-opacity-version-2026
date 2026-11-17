@@ -14,7 +14,8 @@
 
 &star_job
 
-   ! begin with a pre-main sequence model
+   ! begin with a pre-main sequence model (same starting point for both
+   ! 100m suites so the supereduction vs ours comparison is apples-to-apples)
    create_pre_main_sequence_model = .true.
 
    ! save the final model (Si burn / Fe-core) + a final profile
@@ -112,9 +113,11 @@
    ! allow very small timesteps instead of terminating at the 1e-6 s floor
    min_timestep_limit = 1d-12
 
-   ! finer mesh at high T (12M test-suite recipe): resolve the thin O/Si
-   ! burning shell where the run has repeatedly stalled (logT ~9.2)
-   mesh_delta_coeff = 2.5
+   ! base mesh at the MESA default (coarser) so the 100 Msun pre-MS
+   ! bootstrap can converge; the high-T refinement below stays — it only
+   ! activates above logT 9.0, so it plays no part in startup and still
+   ! resolves the O/Si burning shell where runs historically stall.
+   mesh_delta_coeff = 1.0d0
    mesh_delta_coeff_for_highT = 1.5
    logT_max_for_standard_mesh_delta_coeff = 9.0d0
    logT_min_for_highT_mesh_delta_coeff = 9.5d0
